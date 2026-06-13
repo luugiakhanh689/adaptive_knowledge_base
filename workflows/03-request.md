@@ -2,6 +2,10 @@
 
 > Đây là luồng CHÍNH sau setup. User chỉ cần nhắn vấn đề bằng lời thường,
 > mọi bước còn lại tự chạy, user chỉ confirm tại các Gate.
+>
+> **Tầng A (Bước 1–3) TỰ CHẠY — không cần lệnh** (xem CLAUDE.md §0.1): hễ user bàn về
+> tính năng / yêu cầu / thay đổi nghiệp vụ là phân tích luôn (đọc KB → xung đột/tác động/
+> lỗ hổng → trình bày). Chỉ Bước 4 (ghi) mới cần confirm. Đừng hỏi "có muốn phân tích không".
 
 ## Bước 1 — Hiểu yêu cầu, load đúng tri thức (BẮT BUỘC trước khi trả lời)
 
@@ -42,6 +46,19 @@ Trả lời user theo cấu trúc (văn xuôi, không thuật ngữ kỹ thuật
 
 ✋ **GATE 1** — chờ user confirm / chỉnh sửa. Lặp lại bước này đến khi chốt.
 
+## Bước 3.5 — Rà soát chốt phiên (khi user nói "xong / chốt")
+
+Khi user phát tín hiệu kết thúc trao đổi ("xong", "chốt", "ok ghi đi", "vậy là đủ"…),
+TRƯỚC khi sang Bước 4, tự tổng rà **toàn bộ** những gì đã bàn trong phiên:
+
+- **Xung đột chéo** giữa các điểm vừa thảo luận (BR mới vs BR vừa nêu, AC chồng nhau,
+  luồng mâu thuẫn nhau…).
+- **Mâu thuẫn với KB hiện có** + `config/domain-rules.md`.
+- **Lỗ hổng còn lại:** feature thiếu Business Rule / Acceptance Criteria; câu
+  `[CẦN XÁC NHẬN]` chưa được trả lời.
+
+Trình bày bản tổng kết ngắn (checklist) → nếu còn `[CẦN XÁC NHẬN]` thì hỏi nốt → rồi mới ghi.
+
 ## Bước 4 — Ghi tri thức (chỉ sau confirm)
 
 Với feature mới `F-xxx-<slug>` (xem `templates/`):
@@ -68,8 +85,9 @@ Sau đó:
   `05_AcceptanceCriteria/AC-*.md` + backlink về epic/story nguồn.
 - Chạy `python3 tools/kb-indexer/build_index.py --root .` để tự dựng lại
   `.kb/index.json` + `relation-graph.json` + `health-report.md` (khớp docs/ vừa ghi).
-- Cập nhật `source-registry.json`, `changelog.md`. Nếu vừa có reject/sửa lớn → ghi
-  `.kb/lessons.md` (xem workflow 09 mục E).
+- Cập nhật `source-registry.json`, `changelog.md`. Nếu trong phiên vừa có đề xuất bị
+  reject/sửa lớn → ghi `.kb/lessons.md` **NGAY** (CLAUDE.md §0.3, format ở workflow 09
+  mục E), không chờ tới phiên tiến hóa.
 
 ## Bước 5 — Đề xuất bước tiếp
 

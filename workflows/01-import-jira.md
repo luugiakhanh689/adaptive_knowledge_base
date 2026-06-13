@@ -3,6 +3,12 @@
 > Spec gốc: `tools/jira-to-obsidian/CLAUDE_CODE_JIRA_TO_OBSIDIAN_SETUP.md` (Bước 1→7).
 > Script đã viết sẵn: `tools/jira-to-obsidian/import_jira.py` — KHÔNG cần viết lại,
 > chỉ cấu hình và chạy. Muốn quét RIÊNG 1 vài issue → dùng `workflows/01b-import-jira-single.md`.
+>
+> **Lưu ý (đã vá 2026-06-13):** script tự tìm `.env.local` và vault theo vị trí FILE script,
+> KHÔNG theo thư mục đang đứng (cwd). Nhờ vậy chạy qua Cowork (sandbox) từ bất kỳ cwd nào
+> cũng nạp đúng config + ghi đúng vault, y hệt khi double-click `quet-jira.command`. Trước
+> đây Cowork gọi script từ thư mục khác → không thấy `.env.local` → báo "Thiếu JIRA_BASE_URL"
+> dù Terminal vẫn chạy được. `cd` vào tool dir giờ chỉ là tùy chọn, KHÔNG còn bắt buộc.
 
 ## Bước 1 — Kiểm tra môi trường
 
@@ -75,9 +81,22 @@ Chưa có → hướng dẫn cài theo OS.
 >    hoặc python.org; Windows: Microsoft Store / python.org, tick "Add to PATH").
 > 4. User dán kết quả (danh sách project) vào chat → Claude tiếp tục như thường.
 
-- Thành công: danh sách project user thấy được → hỏi user muốn quét project nào
-  (cập nhật `PROJECT_KEYS` nếu cần) + hỏi `GROUP_BY_PROJECT` nếu nhiều project.
+- **Thành công → BẮT BUỘC hiện danh sách project cho user CHỌN** (Bước 3.5). KHÔNG tự ý quét tất cả.
 - Lỗi 401/403/404: giải thích theo bảng trong spec gốc, bằng lời thường.
+
+## Bước 3.5 — Hiện danh sách project → user chọn lấy dữ liệu nào (BẮT BUỘC)
+
+Sau khi `--test` trả về danh sách project, KHÔNG tự quyết phạm vi. Trình bày danh sách rõ
+ràng (mã + tên project) và cho user CHỌN bằng AskUserQuestion:
+
+- Mỗi project = một lựa chọn, cho **chọn nhiều** (`multiSelect`); thêm phương án "Tất cả"
+  và (nếu nhiều project) "Vài project chính".
+- User chọn xong → ghi đúng các mã đã chọn vào `PROJECT_KEYS` trong `.env.local`
+  (cách nhau dấu phẩy). Chọn ≥2 project → bật `GROUP_BY_PROJECT=true`.
+- Project rất lớn (hàng nghìn issue) → báo trước "sẽ lâu + vault lớn, nên chạy nền".
+
+> Ví dụ thật (FMC, 2026-06): `--test` thấy 10 project (FA, FC, FHP, FI, FMCP, FSW, FW,
+> IA, PS, SUPPORT) → hiện cho user tick chọn → chỉ quét đúng cái đã chọn (vd FA = 2.347 issue).
 
 ## Bước 4 — Chạy import
 
@@ -86,7 +105,8 @@ Chưa có → hướng dẫn cài theo OS.
   (`Đang quét project FA — → 2347 issues`...). Claude phải hiển thị lại các dòng này
   trong chat (nguyên văn hoặc tóm tắt theo thời gian thực từng project) để user biết
   hệ thống đang quét gì — không chạy im lặng. Quét xong báo dòng cuối:
-  `Obsidian Vault đã tạo tại: <path>`.
+  `Obsidian Vault đã tạo tại: <path>` → rồi **HIỆN KẾT QUẢ NGAY** (Bước 5): bảng số lượng
+  theo loại + đường dẫn vault, KHÔNG đợi user hỏi mới hiện.
 - Bước 3 phải chạy ở máy user → sinh lệnh import theo đúng OS như Bước 3
   (macOS/Linux: `python3 import_jira.py`; Windows: `py import_jira.py`).
 
@@ -155,14 +175,17 @@ Script tự tạo trong vault: notes Project/Epic/Story/Task/Bug/Sub-task có ba
 
 ## Bước 5 — Báo cáo + Approval Gate
 
-1. Đọc kết quả import, tóm tắt bằng tiếng Việt: bao nhiêu project/epic/story, cái gì
-   thiếu parent (nằm ở `08_RawIssues`), cái gì đáng chú ý.
+1. **Hiện NGAY bảng kết quả** (tiếng Việt): đếm theo loại — Epics / User Stories / Tasks /
+   Bugs / Sub-tasks + **tổng issue** + đường dẫn vault. Lấy số từ dòng script in ra, hoặc
+   đếm file `.md` trong vault. Nêu thêm: cái gì thiếu parent (ở `08_RawIssues`), điểm đáng chú ý.
 2. **Đây là RAW KB** — chưa phải tri thức chính thức. Hỏi user:
    - [A] Phân loại ngay (chạy `workflows/03-request.md` chế độ classify-batch)
    - [B] Để raw đó, phân loại sau theo từng yêu cầu
 3. Merge `_system/*.json` của vault vào `.kb/relation-graph.json` + `.kb/source-registry.json`
    (đánh dấu `status: raw`).
-4. Ghi changelog.
+4. Chạy `python3 tools/kb-indexer/build_index.py --root .` → index/graph/health phản ánh
+   NGAY dữ liệu vault vừa quét, để auto-phân tích (Tầng A) có dữ liệu tra cứu, khỏi grep chay.
+5. Ghi changelog.
 
 ## Guardrails riêng
 

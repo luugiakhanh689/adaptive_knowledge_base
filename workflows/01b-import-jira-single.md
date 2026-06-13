@@ -50,7 +50,9 @@ hiện có — không đụng các note khác.
 2. Hỏi user:
    - [A] Phân tích ngay các issue này thành tri thức (BR/AC/feature) → `workflows/03-request.md`
    - [B] Chỉ lưu raw, xử lý sau
-3. Merge graph/registry vào `.kb/` (đánh dấu `status: raw`), ghi changelog.
+3. Merge graph/registry vào `.kb/` (đánh dấu `status: raw`) → chạy
+   `python3 tools/kb-indexer/build_index.py --root .` để index phản ánh issue vừa quét
+   (auto-phân tích tra được ngay) → ghi changelog.
 
 ## Guardrails
 

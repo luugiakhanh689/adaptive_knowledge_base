@@ -16,4 +16,5 @@ Tạo `source/06-implementation-plan.md`: file ảnh hưởng, thứ tự việc
 ## Bước 3 — ✋ GATE 4
 
 User approve plan → mới được sửa sourcebase (nếu repo code được kết nối).
-Sau khi sửa: cập nhật `07-test-plan.md`, changelog, relation graph (feature → code file).
+Sau khi sửa: cập nhật `07-test-plan.md`, changelog, relation graph (feature → code file)
+→ chạy `python3 tools/kb-indexer/build_index.py --root .` để index khớp plan/test vừa ghi.
