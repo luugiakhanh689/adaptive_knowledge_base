@@ -130,6 +130,11 @@
   .ben{padding:22px;transition:.3s}.ben:hover{transform:translateY(-5px)}
   .ben .ico{font-size:23px;margin-bottom:10px}.ben h4{font-size:15.5px;margin-bottom:6px}.ben p{font-size:13px;color:#cfe0f5}
 
+  .player{margin-top:30px;position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden}
+  .player iframe,.player video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#000}
+  .player .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#cfe0f5}
+  .player .ph .ic{font-size:42px;margin-bottom:12px;opacity:.8}
+  .player .ph p{font-size:13.5px;max-width:52ch}
   .note{margin-top:30px;border:1px solid rgba(244,123,32,.4);background:rgba(244,123,32,.1);border-radius:14px;padding:18px 20px}
   .note b{color:var(--orange)}.note p{font-size:13.5px;color:#f0ddc4;margin-top:4px}
 
@@ -154,6 +159,7 @@
 <nav>
   <div class="rope"><div class="clips" id="clips">
     <a class="poly" href="#hero"><div class="pic">🏠</div><div class="cap">Trang chủ</div></a>
+    <a class="poly" href="#guide"><div class="pic">▶️</div><div class="cap">Video</div></a>
     <a class="poly" href="#how"><div class="pic">⚙️</div><div class="cap">Nguyên lý</div></a>
     <a class="poly" href="#learn"><div class="pic">🧠</div><div class="cap">Học hỏi</div></a>
     <a class="poly" href="#evolve"><div class="pic">🌱</div><div class="cap">Tiến hóa</div></a>
@@ -175,6 +181,19 @@
   </div>
   <div class="scroll-hint">CUỘN ĐỂ LẶN SÂU ↓</div>
 </header>
+
+<section id="guide" data-scene="how">
+  <div class="reveal"><div class="eyebrow" style="color:var(--orange)">▶ Video hướng dẫn</div>
+  <h2>Xem cách dùng trong vài phút</h2>
+  <p class="lead">Toàn cảnh: từ <code>@khởi tạo dự án</code> → quét Jira → nêu yêu cầu → dựng prototype.</p></div>
+  <div class="player glass reveal" id="player">
+    <div class="ph">
+      <div class="ic">🎬</div>
+      <p>Chưa gắn video. Mở <code>index.html</code>, tìm dòng <code>const VIDEO</code> ở đầu thẻ script và điền:</p>
+      <p style="margin-top:8px"><code>youtube:"MÃ_VIDEO"</code> &nbsp;hoặc&nbsp; <code>file:"videos/guide.mp4"</code></p>
+    </div>
+  </div>
+</section>
 
 <section id="how" data-scene="how">
   <div class="reveal"><div class="eyebrow" style="color:#7fd0ff">01 · Nguyên lý làm việc</div>
@@ -251,6 +270,23 @@
 </footer>
 </div>
 
+<script>
+/* ====== CẤU HÌNH VIDEO HƯỚNG DẪN ======
+   Điền MỘT trong hai:
+   - youtube: mã video YouTube (phần sau ?v= trong link). VD link
+     https://www.youtube.com/watch?v=ABC123  →  youtube:"ABC123"
+   - file: đường dẫn file mp4 đặt cùng repo, VD "videos/guide.mp4"
+   (Video nặng nên dùng YouTube để khỏi phình repo / vượt giới hạn GitHub.) */
+const VIDEO = { youtube:"", file:"videos/guide.mp4" };
+(function(){
+  const p=document.getElementById('player'); if(!p) return;
+  if(VIDEO.youtube){
+    p.innerHTML='<iframe src="https://www.youtube.com/embed/'+VIDEO.youtube+'?rel=0" title="Video hướng dẫn" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+  } else if(VIDEO.file){
+    p.innerHTML='<video src="'+VIDEO.file+'" controls preload="metadata" playsinline></video>';
+  }
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
