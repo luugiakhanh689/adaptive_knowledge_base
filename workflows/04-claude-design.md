@@ -62,7 +62,7 @@ Lưu khối này vào `projects/<tên-project>/workspace-rules.md` + in ra cho u
 - Cập nhật `projects/_registry.md`: thêm màn hình/feature mới vào project,
   link tới brief + prototype.
 - Cập nhật relation graph: edges `feature → screen`, `screen → screen (navigates_to)`.
-- Chạy `python3 tools/kb-indexer/build_index.py --root .` (design brief vừa ghi vào
+- Chạy `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) (design brief vừa ghi vào
   `docs/.../05-design-brief.md` → index phải khớp) → ghi changelog.
 - Nhắc user: "Chỉnh prototype xong, cứ **dán kết quả / mô tả thay đổi về đây** (không cần
   nhớ lệnh) — tôi tự nhận diện và cập nhật ngược về Knowledge Base."

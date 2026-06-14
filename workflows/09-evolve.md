@@ -14,7 +14,7 @@ Bất cứ khi nào `docs/` thay đổi (sau mỗi lần ghi tri thức ở work
 đầu mỗi phiên tiến hóa, chạy:
 
 ```bash
-python3 tools/kb-indexer/build_index.py --root .
+python3 tools/kb-indexer/build_index.py --root .   # Windows: py thay python3
 ```
 
 Script tự dựng lại `.kb/index.json` + `.kb/relation-graph.json` (gộp graph raw của

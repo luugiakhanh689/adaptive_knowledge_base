@@ -1,9 +1,9 @@
 {
   "name": "Adaptive Knowledge Base",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "codename": "Genesis-1",
   "released": "2026-06-14",
   "repo": "https://github.com/luugiakhanh689/adaptive_knowledge_base",
   "force": true,
-  "intro": "Bản v1.0.6: sau khi quét xong một nguồn Jira, hệ thống gợi ý nạp thêm nguồn khác (Jira domain khác) hoặc nạp thêm tài liệu (PDF/DOCX/ẢNH); và giờ nhận cả ảnh rời (PNG/JPG) làm tri thức."
+  "intro": "Bản v1.0.7: cài đặt giờ HỎI bạn đã có Obsidian chưa và nói rõ Obsidian là TÙY CHỌN — không có vẫn dùng bình thường; đồng thời mọi lệnh/hướng dẫn đã chuẩn theo hệ điều hành (macOS / Linux / Windows)."
 }

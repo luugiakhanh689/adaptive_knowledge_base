@@ -83,7 +83,7 @@ Với feature đã có: chỉ cập nhật các file bị ảnh hưởng, bump v
 Sau đó:
 - Tạo/cập nhật note vault: `06_Features/F-xxx.md`, `04_BusinessRules/BR-*.md`,
   `05_AcceptanceCriteria/AC-*.md` + backlink về epic/story nguồn.
-- Chạy `python3 tools/kb-indexer/build_index.py --root .` để tự dựng lại
+- Chạy `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) để tự dựng lại
   `.kb/index.json` + `relation-graph.json` + `health-report.md` (khớp docs/ vừa ghi).
 - Cập nhật `source-registry.json`, `changelog.md`. Nếu trong phiên vừa có đề xuất bị
   reject/sửa lớn → ghi `.kb/lessons.md` **NGAY** (CLAUDE.md §0.3, format ở workflow 09

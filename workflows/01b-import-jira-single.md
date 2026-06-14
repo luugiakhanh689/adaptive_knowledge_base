@@ -36,7 +36,7 @@ Nếu user mô tả mơ hồ → hỏi rõ:
 > kết quả trong vault. `auto`/chưa biết → thử sandbox trước rồi mới chuyển.
 
 ```bash
-cd "<đường dẫn tuyệt đối tới tools/jira-to-obsidian>"
+cd "<đường dẫn tuyệt đối tới tools/jira-to-obsidian>"   # Windows (PowerShell): py thay python3, dùng \ trong path
 # Theo key:
 python3 import_jira.py --keys PROJ-102,PROJ-105
 # Hoặc theo JQL:
@@ -54,7 +54,7 @@ hiện có — không đụng các note khác.
    - [A] Phân tích ngay các issue này thành tri thức (BR/AC/feature) → `workflows/03-request.md`
    - [B] Chỉ lưu raw, xử lý sau
 3. Merge graph/registry vào `.kb/` (đánh dấu `status: raw`) → chạy
-   `python3 tools/kb-indexer/build_index.py --root .` để index phản ánh issue vừa quét
+   `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) để index phản ánh issue vừa quét
    (auto-phân tích tra được ngay) → ghi changelog.
 
 ## Guardrails
