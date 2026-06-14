@@ -51,6 +51,6 @@ Tường thuật tiến độ. Lỗi mạng/quyền → hướng dẫn double-cl
 
 1. Đọc lại `version.json` → báo "đã lên vY (Genesis-…)".
 2. **Đọc lại `CLAUDE.md` + `workflows/`** (vừa có thể đổi) trước khi làm việc tiếp.
-3. Chạy `python3 tools/kb-indexer/build_index.py --root .` (phòng khi indexer đổi).
+3. Chạy `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) (phòng khi indexer đổi).
 4. Bản mới có bước "migration" (đổi cấu trúc config/vault) → làm theo `CHANGELOG.md`;
    TUYỆT ĐỐI không tự ý đổi cấu trúc DATA của user khi CHANGELOG không nói.

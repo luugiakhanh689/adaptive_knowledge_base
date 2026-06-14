@@ -21,7 +21,7 @@
 1. Chạy `scripts/import-kb.command` (hoặc truyền đường dẫn zip).
    → đọc `manifest.json`, bung DATA về đúng chỗ, đặt lại `vault_path` cho khớp,
    **thay sạch** vault cũ nếu trùng tên (hỏi y/N trước).
-2. Script tự chạy `python3 tools/kb-indexer/build_index.py --root .` → index khớp tri thức vừa nhập.
+2. Script tự chạy `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) → index khớp tri thức vừa nhập.
 3. Báo user: đã nhập N file, vault ở đâu, mở Obsidian "Open folder as vault".
 4. Token: nếu `.env.local` không đi kèm → hướng dẫn điền lại để quét Jira tiếp.
 

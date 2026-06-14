@@ -25,7 +25,7 @@ File sẽ sửa: ...". Chờ user duyệt (all / chọn / từ chối).
 
 - Cập nhật các file trong `docs/03-features/F-xxx/source/`, bump version.
 - Cập nhật note vault + backlink, `projects/_registry.md` (trạng thái màn hình).
-- Chạy `python3 tools/kb-indexer/build_index.py --root .` (dựng lại index/graph/health
+- Chạy `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) (dựng lại index/graph/health
   khớp `docs/` vừa sửa) → cập nhật `source-registry.json` (source_type: `design_sync`),
   `changelog.md` + `source/changelog.md` của feature.
 - Nếu là quyết định thiết kế lớn → tạo ADR trong `docs/06-decisions/`. Nếu prototype mâu
