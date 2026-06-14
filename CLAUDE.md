@@ -27,7 +27,7 @@
 | "quét task <KEY>" / "quét epic <KEY>" (vd `quét task PROJ-102`) | Confirm → chạy `workflows/01b-import-jira-single.md` |
 | "đặt lịch quét jira", "tự động đồng bộ jira" | Confirm → chạy `workflows/08-schedule-sync.md` |
 | "tiến hóa KB", "dọn dẹp KB", "kiểm tra sức khỏe KB" | Confirm → chạy `workflows/09-evolve.md` |
-| Gửi file PDF/DOCX/zip Obsidian | Confirm → chạy `workflows/02-import-files.md` |
+| Gửi file PDF/DOCX/**ảnh** (PNG/JPG)/zip Obsidian | Confirm → chạy `workflows/02-import-files.md` |
 | Nêu một vấn đề / yêu cầu / thay đổi nghiệp vụ | **TỰ ĐỘNG** phân tích (Tầng A — xem §0.1), không cần lệnh → confirm trước khi ghi |
 | "thiết kế", "prototype", "mở Claude Design" | Confirm → chạy `workflows/04-claude-design.md` |
 | "sync design", dán kết quả từ Claude Design | Confirm → chạy `workflows/05-sync-back.md` |
@@ -90,10 +90,14 @@ Mục tiêu: user KHÔNG cần thuộc lệnh nào — chỉ nói bằng lời t
   diễn đạt*. User nói cùng ý bằng lời thường ("lấy mấy task mới trên Jira về", "làm
   prototype màn hình này", "xuất file Word cho sếp") → tự nhận diện đúng workflow →
   confirm 1 câu → chạy. KHÔNG bắt gõ đúng "quét task", "thiết kế", "xuất tài liệu".
-- **Luôn đề xuất bước tiếp.** Kết thúc MỖI workflow, tự đưa 1–3 lựa chọn bước kế hợp lý
+- **Luôn đề xuất bước tiếp.** Kết thúc MỖI workflow, tự đưa 1–4 lựa chọn bước kế hợp lý
   (dùng AskUserQuestion, kèm phương án khuyến nghị) để user chỉ việc chọn — không phải tự
   nghĩ ra lệnh. Vd sau khi ghi tri thức: "[A] Dựng prototype · [B] Xuất tài liệu · [C]
-  Dừng"; sau khi quét Jira: "[A] Phân tích thành tri thức · [B] Để raw".
+  Dừng"; sau khi quét Jira / nạp file: "[A] Phân loại thành tri thức · [B] Quét thêm nguồn
+  Jira khác · [C] Nạp thêm tài liệu (PDF/DOCX/ảnh) · [D] Dừng".
+- **Sau khi NẠP tri thức từ một nguồn (Jira / file / ảnh), bước-kế LUÔN có lựa chọn "nạp thêm
+  nguồn khác"** (quét Jira domain khác, hoặc nạp tài liệu PDF/DOCX/ảnh) — đừng chỉ hỏi
+  phân loại/dừng. Mục tiêu: gom tri thức từ NHIỀU nguồn dễ dàng, không bắt user nhớ lệnh.
 
 ---
 

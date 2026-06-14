@@ -1,7 +1,8 @@
-# Workflow 02 — Nạp tri thức từ file (PDF / DOCX / MD / zip Obsidian)
+# Workflow 02 — Nạp tri thức từ file (PDF / DOCX / ẢNH / MD / zip Obsidian)
 
-> Trigger: user gửi file hoặc nhắn "nạp tài liệu" (confirm ý định trước). Mỗi file đi qua:
-> raw → normalized → classified → pending-approval → (approve) → KB chính.
+> Trigger: user gửi file (PDF, DOCX, **ảnh PNG/JPG**, .md, zip Obsidian) hoặc nhắn "nạp tài liệu"
+> (confirm ý định trước). Mỗi file đi qua: raw → normalized → classified → pending-approval →
+> (approve) → KB chính.
 
 ## Bước 1 — Tiếp nhận
 
@@ -10,6 +11,7 @@
 | PDF | Copy vào `inbox/raw/pdf/`, trích text (skill pdf); PDF scan/ảnh → OCR. **Trích ảnh sơ đồ (CÁCH CỤ THỂ):** PyMuPDF `fitz` — `page.get_images()` lấy ảnh nhúng; trang không có ảnh-object thì `page.get_pixmap()` (hoặc `pdftoppm`) render cả trang ra PNG → lưu `inbox/raw/pdf/<batch>-img/` |
 | DOCX | Copy vào `inbox/raw/docx/`, trích text (skill docx) + **trích ảnh sơ đồ (CÁCH CỤ THỂ):** .docx là file zip → `unzip -o file.docx 'word/media/*'` lấy mọi ảnh nhúng → lưu `inbox/raw/docx/<batch>-img/` |
 | MD / TXT | Copy vào `inbox/raw/text/` |
+| **Ảnh rời (PNG / JPG / JPEG / WEBP)** | Copy vào `inbox/raw/img/`, Claude **đọc ảnh bằng Read (nhìn trực tiếp = vision)** → mô tả thành text có cấu trúc (tái dùng cách Bước 2.5) → đưa vào `raw_content`. Ảnh sơ đồ/flow → trích flow/BR/AC; ảnh chụp màn hình UI → `design_note`; ảnh mờ/không đọc được → `[CẦN XÁC NHẬN: ảnh <tên> chưa đọc được]`, KHÔNG bịa |
 | ZIP (folder Obsidian) | Giải nén vào `inbox/raw/obsidian/<tên-zip>/`, giữ nguyên backlink |
 
 Đặt batch id: `import-YYYYMMDD-HHMM-<nguồn>`.
@@ -31,8 +33,9 @@ Mỗi tài liệu → 1 file JSON trong `inbox/normalized/` theo schema:
 
 Không thay đổi nghĩa, không suy diễn.
 
-## Bước 2.5 — Hiểu SƠ ĐỒ (sequence diagram / flowchart) bằng vision
+## Bước 2.5 — Hiểu SƠ ĐỒ / ẢNH bằng vision
 
+Áp dụng cho **cả ảnh nhúng** (trong PDF/DOCX) **lẫn ảnh RỜI** user gửi thẳng (PNG/JPG…).
 Tài liệu kỹ thuật hay có sequence diagram / flowchart là **ẢNH** — bước trích text bỏ qua,
 nên phải đọc riêng. **Nếu Bước 1 không ra ảnh nào** (file không có ảnh nhúng) → render từng
 trang PDF ra PNG (`pdftoppm`/`fitz`) rồi đọc trang có sơ đồ; DOCX không có `word/media` → coi
@@ -90,3 +93,8 @@ KHÔNG ghi bất cứ gì vào `docs/` hay vault khi user chưa chọn [A]/[B].
    `source-registry.json`, `changelog.md`. Nếu trong phiên có tài liệu bị từ chối/sửa
    lớn → ghi `.kb/lessons.md` (§0.3).
 4. Chuyển batch sang `inbox/approved/` (hoặc `rejected/`).
+
+## Bước 7 — Đề xuất bước kế (§0.4)
+
+Hỏi **AskUserQuestion** (đừng chỉ dừng): `[A] Dựng prototype / phân tích sâu tính năng vừa nạp ·
+[B] Nạp thêm tài liệu (PDF/DOCX/ảnh) · [C] Quét thêm nguồn Jira khác (→ workflow 01) · [D] Dừng`.
