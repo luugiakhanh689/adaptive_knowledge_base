@@ -211,9 +211,12 @@ Script tự tạo trong vault: notes Project/Epic/Story/Task/Bug/Sub-task có ba
 1. **Hiện NGAY bảng kết quả** (tiếng Việt): đếm theo loại — Epics / User Stories / Tasks /
    Bugs / Sub-tasks + **tổng issue** + đường dẫn vault. Lấy số từ dòng script in ra, hoặc
    đếm file `.md` trong vault. Nêu thêm: cái gì thiếu parent (ở `08_RawIssues`), điểm đáng chú ý.
-2. **Đây là RAW KB** — chưa phải tri thức chính thức. Hỏi user:
-   - [A] Phân loại ngay (chạy `workflows/03-request.md` chế độ classify-batch)
-   - [B] Để raw đó, phân loại sau theo từng yêu cầu
+2. **Đây là RAW KB** — chưa phải tri thức chính thức. Hỏi user **bằng AskUserQuestion (4 lựa chọn)**:
+   - **[A] Phân loại thành tri thức ngay** (chạy `workflows/03-request.md` chế độ classify-batch) — khuyến nghị.
+   - **[B] Quét thêm nguồn Jira khác** (domain nội bộ khác / Atlassian Cloud) → quay lại **Bước 0** của
+     workflow này (chọn/thêm nguồn `.env.<tên>`).
+   - **[C] Nạp thêm tài liệu** (PDF / DOCX / ảnh) → `workflows/02-import-files.md`.
+   - **[D] Để raw đó**, phân loại sau theo từng yêu cầu.
 3. Merge `_system/*.json` của vault vào `.kb/relation-graph.json` + `.kb/source-registry.json`
    (đánh dấu `status: raw`).
 4. Chạy `python3 tools/kb-indexer/build_index.py --root .` → index/graph/health phản ánh
