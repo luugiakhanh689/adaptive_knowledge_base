@@ -1,6 +1,9 @@
 # ===== Bảo mật =====
 **/.env.local
 tools/jira-to-obsidian/.env.local
+# Env per-source (mỗi nguồn Jira 1 file) — DATA của user, KHÔNG commit. Giữ lại .env.example làm template.
+tools/jira-to-obsidian/.env.*
+!tools/jira-to-obsidian/.env.example
 
 # ===== KHÔNG public nội dung nghiệp vụ (chỉ host trang giới thiệu) =====
 # Bỏ comment các dòng dưới nếu muốn GIỮ KB ở local, chỉ đẩy landing page + source code:
@@ -21,8 +24,23 @@ Project_Name_Brain/
 .kb/lessons.md
 .kb/changelog.md
 
+# ===== Cấu hình của user (DATA — không commit, được giữ khi update) =====
+# Các file này do user điền lúc setup. Bản template đi kèm repo là factory-config.example.yaml
+# và config/domain-presets/ — copy ra rồi chỉnh, KHÔNG đẩy bản thật lên git.
+config/factory-config.yaml
+config/domain-rules.md
+
+# ===== Gói export tri thức (tạo bởi scripts/export-kb) — không commit =====
+genesis1-kb-*.zip
+
+# ===== Đánh dấu máy người duy trì (bật quyền "phát hành") — local-only =====
+.maintainer
+
 # ===== Rác hệ thống =====
 .DS_Store
 __pycache__/
 *.pyc
 .venv/
+
+# Local preview/dev config (không publish)
+.claude/

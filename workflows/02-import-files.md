@@ -7,8 +7,8 @@
 
 | Loại file | Hành động |
 |---|---|
-| PDF | Copy vào `inbox/raw/pdf/`, trích text (dùng skill pdf) |
-| DOCX | Copy vào `inbox/raw/docx/`, trích text (dùng skill docx) |
+| PDF | Copy vào `inbox/raw/pdf/`, trích text (skill pdf); PDF scan/ảnh → OCR. **Trích ảnh sơ đồ (CÁCH CỤ THỂ):** PyMuPDF `fitz` — `page.get_images()` lấy ảnh nhúng; trang không có ảnh-object thì `page.get_pixmap()` (hoặc `pdftoppm`) render cả trang ra PNG → lưu `inbox/raw/pdf/<batch>-img/` |
+| DOCX | Copy vào `inbox/raw/docx/`, trích text (skill docx) + **trích ảnh sơ đồ (CÁCH CỤ THỂ):** .docx là file zip → `unzip -o file.docx 'word/media/*'` lấy mọi ảnh nhúng → lưu `inbox/raw/docx/<batch>-img/` |
 | MD / TXT | Copy vào `inbox/raw/text/` |
 | ZIP (folder Obsidian) | Giải nén vào `inbox/raw/obsidian/<tên-zip>/`, giữ nguyên backlink |
 
@@ -30,6 +30,22 @@ Mỗi tài liệu → 1 file JSON trong `inbox/normalized/` theo schema:
 ```
 
 Không thay đổi nghĩa, không suy diễn.
+
+## Bước 2.5 — Hiểu SƠ ĐỒ (sequence diagram / flowchart) bằng vision
+
+Tài liệu kỹ thuật hay có sequence diagram / flowchart là **ẢNH** — bước trích text bỏ qua,
+nên phải đọc riêng. **Nếu Bước 1 không ra ảnh nào** (file không có ảnh nhúng) → render từng
+trang PDF ra PNG (`pdftoppm`/`fitz`) rồi đọc trang có sơ đồ; DOCX không có `word/media` → coi
+như không có sơ đồ ảnh (không bịa). Với mỗi ảnh sơ đồ đã trích:
+
+1. Claude **mở ảnh bằng Read (nhìn trực tiếp)** — đây là cách "hiểu" được sơ đồ ảnh.
+2. Mô tả lại thành text có cấu trúc: các actor/thành phần, thứ tự bước (1→n), thông điệp
+   giữa các bên, nhánh điều kiện (alt/else), vòng lặp (loop), điều kiện bắt đầu/kết thúc.
+3. Ghi mô tả vào `raw_content` của tài liệu (kèm `[sơ đồ: <tên ảnh>]` để trace), **giữ link
+   ảnh gốc**. Sơ đồ dạng code (Mermaid/PlantUML/ASCII) → đọc thẳng text, không cần vision.
+4. Ảnh mờ/không đọc được → đánh dấu `[CẦN XÁC NHẬN: sơ đồ <tên> chưa đọc được]`, KHÔNG bịa.
+
+> Nhờ bước này, luồng nghiệp vụ trong sơ đồ trở thành tri thức (flow/BR/AC), không mất chỉ vì là ảnh.
 
 ## Bước 3 — Phân loại (Auto Classifier)
 
@@ -69,5 +85,8 @@ KHÔNG ghi bất cứ gì vào `docs/` hay vault khi user chưa chọn [A]/[B].
 1. Ghi vào `docs/` đúng vị trí (feature → `docs/03-features/F-xxx/source/`,
    domain → `docs/01-domain/`, thuật ngữ → `docs/08-glossary/`...).
 2. Tạo/cập nhật notes trong Obsidian vault + backlink.
-3. Cập nhật `.kb/index.json`, `relation-graph.json`, `source-registry.json`, `changelog.md`.
+3. Chạy `python3 tools/kb-indexer/build_index.py --root .` (tự dựng lại `index.json` +
+   `relation-graph.json` + `health-report.md` khớp `docs/` vừa ghi) → cập nhật
+   `source-registry.json`, `changelog.md`. Nếu trong phiên có tài liệu bị từ chối/sửa
+   lớn → ghi `.kb/lessons.md` (§0.3).
 4. Chuyển batch sang `inbox/approved/` (hoặc `rejected/`).

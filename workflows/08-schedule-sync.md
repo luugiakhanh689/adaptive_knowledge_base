@@ -5,12 +5,20 @@
 
 ## Điều kiện
 
-- Đã cấu hình `.env.local` (token + URL) và quét full ít nhất 1 lần (có mốc
-  `_system/last-import.txt`).
-- **Quan trọng — chỗ chạy:** scheduled task chạy trong môi trường của Claude.
-  - Jira **Cloud/Atlassian hoặc public** (sandbox ra được) → chạy `--since` tự động hoàn toàn.
-  - Jira **nội bộ/VPN** (sandbox không ra được) → lịch chỉ có thể **nhắc user** chạy file
-    `quet-jira.command`/`.bat`, KHÔNG tự quét được. Nói rõ điều này cho user trước khi đặt lịch.
+- Đã cấu hình `.env.local` (token + URL) và quét đầy đủ ít nhất 1 lần (có mốc
+  `_system/last-import-<host>.txt`).
+
+## ⏰ Cách lịch chạy — NÓI RÕ cho user trước khi đặt
+
+- **Chạy tại máy bạn khi app Claude đang mở** — KHÔNG phải cron đám mây chạy 24/7.
+- **Đặt 9h mà 9h máy tắt / app đóng?** → task **chạy bù NGAY lần mở app kế tiếp** (vd 10h);
+  không sót gì vì `--since` lấy mọi issue cập nhật **kể từ lần đồng bộ trước**.
+- **Chỉ lấy MỚI:** mỗi lần chạy `import_jira.py --since` chỉ kéo issue tạo/sửa từ mốc lần
+  trước rồi merge vào vault — không quét lại từ đầu.
+- Cron tính theo **giờ địa phương** của máy.
+- Mạng: chạy ở máy user nên dùng mạng/VPN của user → tới được cả Jira nội bộ
+  (`company.vn`) lẫn Cloud. (Nếu môi trường chạy không ra được host nội bộ → lịch
+  chuyển sang **nhắc user** chạy lệnh Terminal `python3 "<TOOL_DIR>/import_jira.py" --since`.)
 
 ## Bước 1 — Hỏi tần suất
 
@@ -33,6 +41,23 @@ Gọi `mcp__scheduled-tasks__create_scheduled_task` với:
   > (vd story mới chưa có AC) thì nêu để tôi xử lý sau."
 
 - Ghi `jira.scheduled_sync` (tần suất + task id) vào `factory-config.yaml`.
+
+### Đa nguồn Jira (vd vừa `company.vn` vừa `myteam.atlassian.net`)
+
+Mỗi nguồn = một file cấu hình riêng + một scheduled task riêng:
+- Tạo `.env.<tên-nguồn>` (vd `.env.company`, `.env.cloud`) trong `tools/jira-to-obsidian/`,
+  mỗi file là một bản `.env.local` trỏ đúng Jira đó.
+- Lệnh trong prompt của từng task: `JIRA_ENV_FILE=.env.<tên-nguồn> python3 import_jira.py --since`.
+- Mốc `--since` tách riêng theo host (`last-import-<host>.txt`) → 2 nguồn KHÔNG đè nhau;
+  notes mỗi project ở thư mục riêng; quét full giờ cũng **merge** an toàn, không xoá nguồn kia.
+- ⚠️ **Tránh 2 Jira trùng MÃ project** (vd cả hai đều có `PROJ`): node graph định danh theo mã
+  issue → trùng mã sẽ đè nhau. Đặt `PROJECT_KEYS` không giao nhau giữa các nguồn.
+
+## Xử lý lỗi khi chạy nền
+
+- Phiên scheduled gặp lỗi (401 token hết hạn / mất mạng / Jira nội bộ không tới) → **báo cho
+  user** (giữ `notifyOnCompletion`), KHÔNG im lặng. Mốc `last-import` chỉ cập nhật khi quét
+  THÀNH CÔNG (script không lưu mốc nếu `die()`), nên lần sau tự quét lại từ mốc cũ — không sót.
 
 ## Bước 3 — Xác nhận
 

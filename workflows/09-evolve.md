@@ -51,6 +51,10 @@ Chỉ sửa `docs/` + vault sau khi duyệt → rồi chạy lại mục A (rein
 
 ## E. Học từ phản hồi (feedback loop) — ghi vào `.kb/lessons.md`
 
+> ⚙️ Việc ghi `lessons.md` giờ **tự động ngay trong phiên** mỗi khi có reject/sửa lớn
+> (CLAUDE.md §0.3 + workflow 03 Bước 4) — KHÔNG chờ tới đây. Mục E này là bản rà soát
+> định kỳ: gom các bài học rời, phát hiện mẫu lỗi lặp lại, nâng thành ADR nếu cần.
+
 Khi một feature/design/code bị user reject hoặc phải sửa lớn, sau khi xử lý xong:
 - Ghi 1 mục vào `.kb/lessons.md`: ngày — bối cảnh — "lần đầu sai gì" — "rút ra điều gì".
 - Nếu là quyết định lớn → tạo ADR trong `docs/06-decisions/`.

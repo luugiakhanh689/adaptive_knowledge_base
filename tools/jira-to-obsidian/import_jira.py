@@ -7,8 +7,8 @@ Theo spec: CLAUDE_CODE_JIRA_TO_OBSIDIAN_SETUP.md (Bước 1→7).
 Dùng:
   python import_jira.py                    # quét toàn bộ (theo PROJECT_KEYS)
   python import_jira.py --test             # chỉ test kết nối
-  python import_jira.py --keys FPT-102,FPT-105   # quét riêng vài issue (merge vào vault)
-  python import_jira.py --jql "parent = FPT-101" # quét theo JQL (merge vào vault)
+  python import_jira.py --keys PROJ-102,PROJ-105   # quét riêng vài issue (merge vào vault)
+  python import_jira.py --jql "parent = PROJ-101" # quét theo JQL (merge vào vault)
   python import_jira.py --per-project            # mỗi project 1 thư mục con (hoặc GROUP_BY_PROJECT=true trong .env.local)
   python import_jira.py --since 2026-06-01       # chỉ quét issue tạo/sửa từ 2026-06-01 (merge vào vault)
   python import_jira.py --since                  # quét incremental từ lần chạy trước (tự đọc mốc)
@@ -31,8 +31,22 @@ from datetime import datetime, timezone
 # Chỉ dùng thư viện chuẩn Python — KHÔNG cần pip install gì.
 
 
-def load_env_local(path=".env.local"):
-    """Đọc .env.local (KEY=VALUE từng dòng), không ghi đè biến env đã có."""
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def load_env_local(path=None):
+    """Đọc .env.local nằm CẠNH script (KEY=VALUE từng dòng), không ghi đè biến env đã có.
+
+    Dùng đường dẫn theo vị trí FILE script — KHÔNG theo thư mục đang đứng (cwd) — để chạy
+    được từ BẤT KỲ đâu (Cowork/sandbox, cron, Terminal) mà vẫn nạp đúng cấu hình. Trước đây
+    path mặc định là ".env.local" tương đối theo cwd → Cowork gọi từ thư mục khác là mất config."""
+    if path is None:
+        # JIRA_ENV_FILE cho phép chỉ định file cấu hình khác → ĐA NGUỒN Jira: mỗi nguồn một
+        # file (.env.company, .env.cloud...) và lịch sync riêng. Mặc định ".env.local".
+        # Đường dẫn tương đối → neo theo thư mục script.
+        path = os.environ.get("JIRA_ENV_FILE") or ".env.local"
+        if not os.path.isabs(path):
+            path = os.path.join(SCRIPT_DIR, path)
     if not os.path.exists(path):
         return
     with open(path, encoding="utf-8") as f:
@@ -52,7 +66,10 @@ EMAIL = (os.getenv("JIRA_EMAIL") or "").strip()
 # auto = tự nhận diện: có JIRA_EMAIL hoặc URL *.atlassian.net → Cloud (Basic email:token);
 # còn lại → Server/DC (Bearer PAT). Ép bằng JIRA_AUTH_MODE = cloud | server
 AUTH_MODE = (os.getenv("JIRA_AUTH_MODE") or "auto").strip().lower()
-VAULT = os.getenv("OBSIDIAN_VAULT") or "./KB-Vault"
+# Vault: đường dẫn tương đối → neo theo thư mục script (tools/jira-to-obsidian/), KHÔNG
+# theo cwd — để Cowork chạy từ đâu cũng GHI đúng chỗ như khi chạy bằng quet-jira.command.
+_vault_raw = os.getenv("OBSIDIAN_VAULT") or "./KB-Vault"
+VAULT = _vault_raw if os.path.isabs(_vault_raw) else os.path.normpath(os.path.join(SCRIPT_DIR, _vault_raw))
 PROJECT_KEYS = [k.strip() for k in (os.getenv("PROJECT_KEYS") or "").split(",") if k.strip()]
 AC_FIELD = os.getenv("JIRA_AC_FIELD") or ""
 BR_FIELD = os.getenv("JIRA_BR_FIELD") or ""
@@ -126,6 +143,9 @@ def api_get(path, params=None):
             die("403 Forbidden — account không có quyền xem. Cần quyền Browse Project.")
         if e.code == 404:
             die(f"404 Not Found — kiểm tra JIRA_BASE_URL hoặc key/JQL ({path}).")
+        if e.code == 410:
+            die("410 Gone — endpoint Jira đã bị gỡ. Cloud đã bỏ /rest/api/2/search; "
+                "script dùng /rest/api/3/search/jql cho Cloud. Nếu vẫn gặp, cập nhật tool.")
         body = ""
         try:
             body = e.read().decode("utf-8", "replace")[:500]
@@ -194,6 +214,15 @@ def issue_fields():
 
 
 def fetch_by_jql(jql):
+    """Server/DC: /rest/api/2/search (phân trang startAt/total).
+    Cloud: /rest/api/3/search/jql (phân trang nextPageToken) — Atlassian đã GỠ
+    /rest/api/2/search trên Cloud (HTTP 410, CHANGE-2046), nên phải tách đường."""
+    if _is_cloud():
+        return _fetch_jql_cloud(jql)
+    return _fetch_jql_server(jql)
+
+
+def _fetch_jql_server(jql):
     issues, start = [], 0
     while True:
         data = api_get("/rest/api/2/search", {
@@ -202,6 +231,21 @@ def fetch_by_jql(jql):
         issues += data.get("issues", [])
         start += 100
         if start >= data.get("total", 0):
+            return issues
+
+
+def _fetch_jql_cloud(jql):
+    # Endpoint mới: phân trang bằng nextPageToken (không có 'total'); lặp tới khi hết token.
+    issues, token = [], None
+    while True:
+        params = {"jql": jql, "maxResults": 100, "fields": issue_fields()}
+        if token:
+            params["nextPageToken"] = token
+        data = api_get("/rest/api/3/search/jql", params)
+        batch = data.get("issues", [])
+        issues += batch
+        token = data.get("nextPageToken")
+        if not token or not batch:
             return issues
 
 
@@ -215,8 +259,8 @@ def fetch_projects():
 PROJECT_NAMES = {}  # key -> tên project (điền khi quét, dùng đặt tên thư mục đầy đủ)
 
 # Mẫu tên thư mục project — đổi trong .env.local, placeholder: {key}, {name}
-# Vd: PROJECT_FOLDER_PATTERN={key}_{name}  →  FA_FMC-App
-#     PROJECT_FOLDER_PATTERN={name}        →  FMC-App
+# Vd: PROJECT_FOLDER_PATTERN={key}_{name}  →  PROJ_MyApp
+#     PROJECT_FOLDER_PATTERN={name}        →  MyApp
 #     PROJECT_FOLDER_PATTERN={key}         →  FA
 FOLDER_PATTERN = os.getenv("PROJECT_FOLDER_PATTERN") or "{key}_{name}"
 
@@ -310,14 +354,25 @@ def write_issue(issue, pkey, fname_map, nodes, edges, registry):
     })
 
 
+def _source_id():
+    """Định danh nguồn theo host của JIRA_BASE_URL — mỗi Jira một mốc đồng bộ riêng, để
+    đa nguồn (Server + Cloud) không đè mốc --since của nhau."""
+    host = urllib.parse.urlparse(BASE_URL).netloc or "default"
+    return re.sub(r"[^\w.-]", "_", host)
+
+
 def _last_import_path():
-    return os.path.join(VAULT, DIRS["system"], "last-import.txt")
+    return os.path.join(VAULT, DIRS["system"], f"last-import-{_source_id()}.txt")
 
 
 def read_last_import():
     p = _last_import_path()
     if os.path.exists(p):
         return open(p, encoding="utf-8").read().strip()
+    # Tương thích ngược: mốc cũ dùng chung "last-import.txt" (trước khi tách theo nguồn).
+    legacy = os.path.join(VAULT, DIRS["system"], "last-import.txt")
+    if os.path.exists(legacy):
+        return open(legacy, encoding="utf-8").read().strip()
     return ""
 
 
@@ -424,11 +479,9 @@ def run_full():
     root_dirs = [DIRS["index"], DIRS["system"]] if PER_PROJECT else ALL_DIRS
     for d in root_dirs:
         os.makedirs(os.path.join(VAULT, d), exist_ok=True)
-    write(os.path.join(VAULT, DIRS["system"], "relation-graph.json"),
-          json.dumps({"generated_at": NOW, "nodes": nodes, "edges": edges},
-                     ensure_ascii=False, indent=2))
-    write(os.path.join(VAULT, DIRS["system"], "source-registry.json"),
-          json.dumps(registry, ensure_ascii=False, indent=2))
+    # MERGE (không ghi đè) vào _system → quét nguồn thứ 2 (vd projectB sau projectA)
+    # KHÔNG xoá dữ liệu nguồn cũ. Mỗi project ở thư mục riêng nên notes không đụng nhau.
+    merge_system(nodes, edges, registry)
     write(os.path.join(VAULT, DIRS["index"], "Jira-Knowledge-Base.md"), "\n".join(index_lines))
     print(f"\nHoàn tất.\nObsidian Vault đã tạo tại: {os.path.abspath(VAULT)}")
 
@@ -436,8 +489,8 @@ def run_full():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--test", action="store_true", help="Chỉ test kết nối")
-    ap.add_argument("--keys", help="Quét riêng các issue, vd: FPT-102,FPT-105")
-    ap.add_argument("--jql", help='Quét theo JQL, vd: "parent = FPT-101"')
+    ap.add_argument("--keys", help="Quét riêng các issue, vd: PROJ-102,PROJ-105")
+    ap.add_argument("--jql", help='Quét theo JQL, vd: "parent = PROJ-101"')
     ap.add_argument("--since", nargs="?", const="__last__",
                     help='Chỉ quét issue MỚI/CẬP NHẬT. --since 2026-06-01 theo ngày; '
                          '--since (không tham số) = từ lần quét trước (đọc _system/last-import.txt)')

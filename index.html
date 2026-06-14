@@ -10,6 +10,7 @@
     --blue:#1e6fc0; --orange:#f47b20; --green:#1fa84a; --teal:#2dd4bf; --vio:#9b6bff;
     --line:rgba(255,255,255,.1); --card:rgba(10,28,54,.55);
     --deep:#02101f;
+    --ease:cubic-bezier(.16,1,.3,1); --bounce:cubic-bezier(.34,1.4,.6,1);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth}
@@ -65,7 +66,9 @@
   .poly .pic{height:clamp(30px,5vw,40px);border-radius:2px;display:grid;place-items:center;font-size:18px;
     background:linear-gradient(160deg,#16456f,#0b2845)}
   .poly .cap{font-size:10.5px;font-weight:700;margin-top:5px;letter-spacing:.2px}
-  .poly:hover{transform:rotate(0) translateY(3px) scale(1.06);z-index:2}
+  .poly{transition:transform .35s var(--bounce),box-shadow .35s var(--ease)}
+  .poly:hover{transform:rotate(0) translateY(3px) scale(1.08);z-index:2;box-shadow:0 14px 28px rgba(0,0,0,.5);animation-play-state:paused}
+  .poly:active{transform:rotate(0) translateY(5px) scale(1.03)}
   @keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
 
   .burger{display:none;position:fixed;top:14px;right:16px;z-index:40;flex-direction:column;gap:5px;background:rgba(3,20,40,.7);border:1px solid var(--line);border-radius:10px;padding:9px;cursor:pointer}
@@ -78,14 +81,31 @@
   .pill{display:inline-flex;gap:8px;align-items:center;font-size:11.5px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:20px;background:rgba(3,20,40,.45);backdrop-filter:blur(6px)}
   .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal);animation:pulse 2s infinite}
   @keyframes pulse{50%{opacity:.35}}
+  /* ----- Model card nổi bật (Genesis-1) ----- */
+  .model-card{display:inline-flex;align-items:center;gap:13px;margin-bottom:22px;max-width:92vw;
+    padding:11px 20px 11px 12px;border-radius:16px;
+    background:linear-gradient(120deg,rgba(30,111,192,.22),rgba(155,107,255,.22));border:1px solid rgba(127,208,255,.32);
+    backdrop-filter:blur(10px);box-shadow:0 12px 36px rgba(40,90,180,.32),inset 0 1px 0 rgba(255,255,255,.1);
+    animation:floatY 4.6s ease-in-out infinite}
+  .model-card .mc-glyph{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:17px;color:#fff;
+    background:linear-gradient(135deg,var(--blue),var(--vio));box-shadow:0 6px 20px rgba(123,107,255,.55);animation:pulseGlow 2.6s ease-in-out infinite}
+  .model-card .mc-body{text-align:left}
+  .model-card .mc-name{font-size:16px;font-weight:800;letter-spacing:.3px;line-height:1.15;
+    background:linear-gradient(100deg,#9fd4ff,#fff 45%,#cdbcff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .model-card .mc-ver{font-size:10px;font-weight:800;color:#04223f;-webkit-text-fill-color:#04223f;background:var(--teal);padding:2px 7px;border-radius:999px;margin-left:5px;vertical-align:middle;letter-spacing:.3px}
+  .model-card .mc-desc{font-size:11px;color:var(--mut);margin-top:3px;max-width:300px;line-height:1.4}
+  @keyframes floatY{50%{transform:translateY(-6px)}}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 6px 20px rgba(123,107,255,.5)}50%{box-shadow:0 8px 32px rgba(123,107,255,.92)}}
   h1{font-size:clamp(32px,7.5vw,72px);line-height:1.04;font-weight:850;letter-spacing:-1.4px;max-width:15ch;text-shadow:0 4px 30px rgba(0,0,0,.5)}
   h1 .grad{background:linear-gradient(120deg,#7fd0ff,var(--vio) 55%,var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
   header .sub{margin-top:20px;max-width:58ch;color:#cfe0f5;font-size:clamp(14px,2.2vw,18px);text-shadow:0 2px 16px rgba(0,0,0,.6)}
   .cta{margin-top:34px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-  .btn{font-size:14px;font-weight:600;padding:13px 22px;border-radius:12px;text-decoration:none;border:1px solid var(--line);transition:.25s;cursor:pointer;color:var(--ink)}
+  .btn{font-size:14px;font-weight:600;padding:13px 22px;border-radius:12px;text-decoration:none;border:1px solid var(--line);cursor:pointer;color:var(--ink);
+    transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s var(--ease),border-color .3s var(--ease)}
   .btn.primary{background:linear-gradient(120deg,var(--blue),var(--vio));border:none;box-shadow:0 8px 30px rgba(30,111,192,.45)}
-  .btn.primary:hover{transform:translateY(-2px)}
-  .btn.ghost{background:rgba(3,20,40,.4);backdrop-filter:blur(6px)}.btn.ghost:hover{background:rgba(3,20,40,.7)}
+  .btn.primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 42px rgba(123,107,255,.55)}
+  .btn.ghost{background:rgba(3,20,40,.4);backdrop-filter:blur(6px)}.btn.ghost:hover{background:rgba(3,20,40,.72);transform:translateY(-2px);border-color:rgba(127,208,255,.4)}
+  .btn:active{transform:translateY(-1px) scale(.97)}
   .scroll-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:var(--mut);font-size:10.5px;letter-spacing:2px;animation:bob 2s infinite}
   @keyframes bob{50%{transform:translate(-50%,8px)}}
 
@@ -94,14 +114,19 @@
   .eyebrow{font-size:11.5px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:12px}
   h2{font-size:clamp(24px,5vw,40px);font-weight:800;letter-spacing:-.5px;margin-bottom:14px;text-shadow:0 2px 20px rgba(0,0,0,.5)}
   .lead{color:#cfe0f5;font-size:clamp(14px,2.2vw,17px);max-width:68ch}
-  .glass{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:18px}
-  .reveal{opacity:0;transform:translateY(40px);transition:.9s cubic-bezier(.2,.7,.2,1)}
+  .glass{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:18px;
+    transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .45s var(--ease),background .45s var(--ease)}
+  .reveal{opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity .8s var(--ease),transform .45s var(--ease),box-shadow .4s var(--ease),border-color .4s var(--ease),background .4s var(--ease)}
   .reveal.in{opacity:1;transform:none}
-  .s1{transition-delay:.08s}.s2{transition-delay:.16s}.s3{transition-delay:.24s}
+  .s1{transition-delay:.07s}.s2{transition-delay:.14s}.s3{transition-delay:.21s}.s4{transition-delay:.28s}.s5{transition-delay:.35s}
 
   .loop{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
-  .phase{position:relative;padding:24px 20px;overflow:hidden;transition:.3s}
-  .phase:hover{transform:translateY(-6px)}
+  .phase{position:relative;padding:24px 20px;overflow:hidden}
+  .phase .glow{transition:transform .55s var(--ease),opacity .55s var(--ease)}
+  .phase:hover{transform:translateY(-9px) scale(1.015);box-shadow:0 22px 52px rgba(0,0,0,.5);border-color:rgba(127,208,255,.45)}
+  .phase:hover .glow{opacity:.78;transform:scale(1.25)}
+  .phase:active{transform:translateY(-4px) scale(.995)}
   .phase .num{font-size:13px;font-weight:800;color:#02101f;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;margin-bottom:14px}
   .phase h3{font-size:18px;margin-bottom:7px}.phase p{font-size:13.5px;color:#cfe0f5}
   .phase .glow{position:absolute;width:150px;height:150px;border-radius:50%;filter:blur(55px);opacity:.45;top:-40px;right:-40px}
@@ -111,44 +136,95 @@
 
   .flow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:30px}
   .node{flex:1;min-width:150px;padding:18px;text-align:center}
-  .node .ic{font-size:26px;margin-bottom:8px}.node h4{font-size:15px;margin-bottom:5px}.node p{font-size:12.5px;color:#cfe0f5}
+  .node .ic{font-size:26px;margin-bottom:8px;display:inline-block;transition:transform .45s var(--bounce)}.node h4{font-size:15px;margin-bottom:5px}.node p{font-size:12.5px;color:#cfe0f5}
+  .node:hover{transform:translateY(-7px);box-shadow:0 18px 44px rgba(0,0,0,.42);border-color:rgba(127,208,255,.4)}
+  .node:hover .ic{transform:scale(1.22)}
+  .node:active{transform:translateY(-3px) scale(.99)}
   .arrow{color:var(--teal);font-size:22px;font-weight:700}
 
   .steps{margin-top:32px;position:relative}
   .steps::before{content:"";position:absolute;left:23px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--blue),var(--orange),var(--green))}
   .step{display:flex;gap:18px;margin-bottom:20px}
-  .step .ix{flex:0 0 48px;height:48px;border-radius:14px;background:rgba(3,20,40,.7);border:1px solid var(--line);display:grid;place-items:center;font-weight:800;color:#7fd0ff;z-index:1}
+  .step .ix{flex:0 0 48px;height:48px;border-radius:14px;background:rgba(3,20,40,.7);border:1px solid var(--line);display:grid;place-items:center;font-weight:800;color:#7fd0ff;z-index:1;transition:transform .4s var(--bounce),box-shadow .4s var(--ease)}
   .step .body{padding:16px 18px;flex:1}.step .body h4{font-size:16px;margin-bottom:5px}.step .body p{font-size:13.5px;color:#cfe0f5}
+  .step:hover .ix{transform:scale(1.08);box-shadow:0 0 0 5px rgba(127,208,255,.12)}
+  .step:hover .body{transform:translateX(5px)}
   code{background:rgba(127,208,255,.16);color:#cfe9ff;padding:2px 8px;border-radius:6px;font-size:.92em;font-family:ui-monospace,monospace}
 
   .cmds{margin-top:30px;display:grid;gap:9px}
-  .cmd{display:grid;grid-template-columns:minmax(140px,250px) 1fr;gap:16px;align-items:center;padding:13px 16px;transition:.2s}
-  .cmd:hover{transform:translateX(4px);border-color:rgba(127,208,255,.5)}
-  .cmd .k{font-family:ui-monospace,monospace;font-size:13px;color:#cfe9ff;font-weight:600}.cmd .d{font-size:13px;color:#cfe0f5}
+  .cmd{display:grid;grid-template-columns:minmax(140px,250px) 1fr;gap:16px;align-items:center;padding:13px 16px}
+  .cmd:hover{transform:translateX(7px);border-color:rgba(127,208,255,.6);background:rgba(22,52,92,.5)}
+  .cmd:active{transform:translateX(4px) scale(.995)}
+  .cmd .k{font-family:ui-monospace,monospace;font-size:13px;color:#cfe9ff;font-weight:600;transition:color .3s}.cmd:hover .k{color:#fff}.cmd .d{font-size:13px;color:#cfe0f5}
 
   .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:32px}
-  .ben{padding:22px;transition:.3s}.ben:hover{transform:translateY(-5px)}
-  .ben .ico{font-size:23px;margin-bottom:10px}.ben h4{font-size:15.5px;margin-bottom:6px}.ben p{font-size:13px;color:#cfe0f5}
+  .ben{padding:22px}
+  .ben .ico{font-size:23px;margin-bottom:10px;display:inline-block;transition:transform .45s var(--bounce)}.ben h4{font-size:15.5px;margin-bottom:6px}.ben p{font-size:13px;color:#cfe0f5}
+  .ben:hover{transform:translateY(-8px) scale(1.015);box-shadow:0 22px 48px rgba(0,0,0,.42);border-color:rgba(127,208,255,.42)}
+  .ben:hover .ico{transform:scale(1.25) rotate(-7deg)}
+  .ben:active{transform:translateY(-3px) scale(.99)}
 
   .player{margin-top:30px;position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden}
   .player iframe,.player video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#000}
   .player .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#cfe0f5}
   .player .ph .ic{font-size:42px;margin-bottom:12px;opacity:.8}
   .player .ph p{font-size:13.5px;max-width:52ch}
+  /* ----- Lessons (khóa học dạng node) ----- */
+  .lessons{margin-top:34px;position:relative}
+  .lessons::before{content:"";position:absolute;left:23px;top:28px;bottom:28px;width:2px;
+    background:linear-gradient(var(--blue),var(--vio),var(--teal));opacity:.55}
+  .lesson{display:flex;gap:20px;margin-bottom:26px;position:relative}
+  .lesson .ln{flex:0 0 48px;display:flex;justify-content:center;padding-top:14px}
+  .lesson .ln-num{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;
+    font-size:19px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--blue),var(--vio));
+    box-shadow:0 8px 22px rgba(123,107,255,.5);border:3px solid var(--deep);position:relative;z-index:1;
+    transition:transform .4s var(--bounce),box-shadow .4s var(--ease)}
+  .lesson:hover .ln-num{transform:scale(1.08);box-shadow:0 10px 30px rgba(123,107,255,.7)}
+  .lesson-body{flex:1;min-width:0;padding:16px 16px 18px}
+  .lesson-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .lesson-tag{font-size:10px;font-weight:800;letter-spacing:1.2px;color:#04223f;background:var(--teal);padding:3px 10px;border-radius:999px}
+  .lesson-title{font-size:16px;font-weight:700;line-height:1.4;color:var(--ink)}
+  .lesson-title code{font-size:.9em}
+  .lesson .player{margin-top:14px;max-width:100%}
+  .vfull{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--teal);text-decoration:none;opacity:.9}
+  .vfull:hover{opacity:1;text-decoration:underline}
+  @media(max-width:760px){.lesson{gap:12px}.lesson .ln{flex:0 0 40px;padding-top:12px}.lesson .ln-num{width:40px;height:40px;font-size:16px}.lessons::before{left:19px}.lesson-body{padding:12px 10px 14px}.lesson .player{margin-top:12px;border-radius:12px}.vfull{font-size:13.5px;margin-top:12px}}
   .note{margin-top:30px;border:1px solid rgba(244,123,32,.4);background:rgba(244,123,32,.1);border-radius:14px;padding:18px 20px}
   .note b{color:var(--orange)}.note p{font-size:13.5px;color:#f0ddc4;margin-top:4px}
 
   footer{text-align:center;padding:50px 6vw;color:var(--mut);font-size:13px;border-top:1px solid var(--line);background:rgba(2,12,24,.5)}
   .drag-hint{position:fixed;right:16px;bottom:14px;z-index:25;font-size:11px;color:var(--mut);border:1px solid var(--line);background:rgba(3,20,40,.6);backdrop-filter:blur(8px);padding:7px 12px;border-radius:999px;pointer-events:none;animation:pulse 2.6s infinite}
 
+  @keyframes menuIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
   @media(max-width:760px){
-    .loop{grid-template-columns:1fr}.cmd{grid-template-columns:1fr;gap:3px}.flow{flex-direction:column}.arrow{transform:rotate(90deg)}
-    .burger{display:flex}
-    .clips{overflow-x:auto;justify-content:flex-start;-webkit-overflow-scrolling:touch}
+    .loop{grid-template-columns:1fr}.cmd{grid-template-columns:1fr;gap:4px;padding:14px 16px}.flow{flex-direction:column}.arrow{transform:rotate(90deg)}
+    .burger{display:none}
+    section{min-height:auto;padding:84px 6vw 56px;scroll-margin-top:118px}
+    header{padding:120px 7vw 60px;min-height:96svh;justify-content:flex-start}
+    h1{letter-spacing:-.8px}
+    .cta{gap:10px;width:100%}.cta .btn{flex:1 1 44%;text-align:center;padding:15px 16px}
+    .drag-hint{display:none}
+    /* nav clothesline (thẻ treo) — GIỮ trên mobile, vẫn đung đưa, cuộn ngang được */
     .rope::before{display:none}
-    section{min-height:auto;padding:10vh 7vw}
+    .clips{overflow-x:auto;overflow-y:visible;justify-content:flex-start;padding:4px 14px 8px;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .clips::-webkit-scrollbar{display:none}
+    .poly{flex:0 0 auto;width:54px;padding:5px 4px 10px}
+    .poly .pic{height:24px;font-size:14px}.poly .cap{font-size:9px}
+    .step{gap:13px}.step .ix{flex:0 0 42px;height:42px}
   }
-  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+  @media(max-width:430px){
+    .cta .btn{flex:1 1 100%}
+    .loop,.grid2{gap:12px}
+    section{padding:76px 18px 48px}
+    h2{font-size:23px}
+  }
+  /* Thiết bị cảm ứng: bỏ hover "dính", giữ phản hồi khi chạm (:active) */
+  @media(hover:none){
+    .phase:hover,.ben:hover,.node:hover,.cmd:hover,.btn:hover,.step:hover .body{transform:none}
+    .phase:active,.ben:active,.node:active,.cmd:active{transform:scale(.985)}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -165,6 +241,7 @@
     <a class="poly" href="#evolve"><div class="pic">🌱</div><div class="cap">Tiến hóa</div></a>
     <a class="poly" href="#cmds"><div class="pic">⌨️</div><div class="cap">Câu lệnh</div></a>
     <a class="poly" href="#benefit"><div class="pic">⭐</div><div class="cap">Lợi ích</div></a>
+    <a class="poly" href="#download"><div class="pic">⬇</div><div class="cap">Tải về</div></a>
   </div></div>
 </nav>
 <button class="burger" id="burger"><span></span><span></span><span></span></button>
@@ -173,24 +250,47 @@
 <header id="hero">
   <span class="fpt shine hero-logo"><span class="marks"><span class="pl b"><span class="face"><b>F</b></span></span><span class="pl o"><span class="face"><b>P</b></span></span><span class="pl g"><span class="face"><b>T</b></span></span></span><span class="isc">ISC</span></span>
   <span class="pill"><span class="dot"></span> Adaptive Knowledge Base · Product Factory</span>
+  <div class="model-card">
+    <span class="mc-glyph">◆</span>
+    <div class="mc-body">
+      <div class="mc-name">Genesis-1 <span class="mc-ver">v1.0.4</span></div>
+      <div class="mc-desc">Model như một cây tri thức sống — càng học, càng hiểu, càng tự hoàn thiện.</div>
+    </div>
+  </div>
   <h1>Bộ não thứ hai <span class="grad">tự lớn lên</span> cùng dự án</h1>
-  <p class="sub">Gõ <b>"@khởi tạo dự án"</b> — hệ thống tự nạp tài liệu từ Jira/Atlassian và file, dựng cây tri thức có liên kết, học từ mỗi phiên làm việc. Bạn chỉ việc xác nhận.</p>
+  <p class="sub">Gõ <b>"@khởi tạo dự án"</b> — hệ thống tự nạp tri thức từ <b>nhiều nguồn Jira (Server + Cloud)</b> và file Word/PDF (đọc hiểu cả sơ đồ sequence bằng vision), dựng cây tri thức có liên kết, học từ mỗi phiên làm việc. Bạn chỉ việc xác nhận.</p>
   <div class="cta">
-    <a href="#how" class="btn primary">Xem nguyên lý →</a>
+    <a href="https://github.com/luugiakhanh689/adaptive_knowledge_base/archive/refs/heads/release.zip" class="btn primary" target="_blank" rel="noopener">⬇ Tải về</a>
+    <a href="#how" class="btn ghost">Xem nguyên lý →</a>
     <a href="#evolve" class="btn ghost">Cơ chế tiến hóa</a>
+    <a href="https://github.com/luugiakhanh689/adaptive_knowledge_base" class="btn ghost" target="_blank" rel="noopener">&lt;/&gt; Mã nguồn</a>
+    <a href="https://github.com/luugiakhanh689/adaptive_knowledge_base/issues" class="btn ghost" target="_blank" rel="noopener">💬 Phản hồi</a>
   </div>
   <div class="scroll-hint">CUỘN ĐỂ LẶN SÂU ↓</div>
 </header>
 
 <section id="guide" data-scene="how">
   <div class="reveal"><div class="eyebrow" style="color:var(--orange)">▶ Video hướng dẫn</div>
-  <h2>Xem cách dùng trong vài phút</h2>
-  <p class="lead">Toàn cảnh: từ <code>@khởi tạo dự án</code> → quét Jira → nêu yêu cầu → dựng prototype.</p></div>
-  <div class="player glass reveal" id="player">
-    <div class="ph">
-      <div class="ic">🎬</div>
-      <p>Chưa gắn video. Mở <code>index.html</code>, tìm dòng <code>const VIDEO</code> ở đầu thẻ script và điền:</p>
-      <p style="margin-top:8px"><code>youtube:"MÃ_VIDEO"</code> &nbsp;hoặc&nbsp; <code>file:"videos/guide.mp4"</code></p>
+  <h2>Học theo từng bước</h2>
+  <p class="lead">Lộ trình 2 video: toàn cảnh luồng làm việc, và việc cần làm sau khi khởi tạo project.</p></div>
+  <div class="lessons">
+    <div class="lesson reveal s1">
+      <div class="ln"><span class="ln-num">1</span></div>
+      <div class="lesson-body glass">
+        <div class="lesson-head"><span class="lesson-tag">KHỞI TẠO DỰ ÁN</span></div>
+        <h3 class="lesson-title">Toàn cảnh: từ <code>@khởi tạo dự án</code> → quét Jira → nêu yêu cầu → dựng prototype</h3>
+        <div class="player"><iframe src="https://drive.google.com/file/d/1sHWLTuk8FqkzSCVGGk3DKVlLpKAa4ueD/preview" title="Khởi tạo dự án" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer" loading="lazy" allowfullscreen></iframe></div>
+        <a class="vfull" href="https://drive.google.com/file/d/1sHWLTuk8FqkzSCVGGk3DKVlLpKAa4ueD/view" target="_blank" rel="noopener">⛶ Xem toàn màn hình (mobile xoay ngang được)</a>
+      </div>
+    </div>
+    <div class="lesson reveal s2">
+      <div class="ln"><span class="ln-num">2</span></div>
+      <div class="lesson-body glass">
+        <div class="lesson-head"><span class="lesson-tag">SAU KHỞI TẠO</span></div>
+        <h3 class="lesson-title">Sau khi khởi tạo project thành công</h3>
+        <div class="player"><iframe src="https://drive.google.com/file/d/1swdEQ87xTjZy_q-8iXhvbZ-uuYEXmwkI/preview" title="Sau khởi tạo" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer" loading="lazy" allowfullscreen></iframe></div>
+        <a class="vfull" href="https://drive.google.com/file/d/1swdEQ87xTjZy_q-8iXhvbZ-uuYEXmwkI/view" target="_blank" rel="noopener">⛶ Xem toàn màn hình (mobile xoay ngang được)</a>
+      </div>
     </div>
   </div>
 </section>
@@ -240,15 +340,18 @@
   <p class="lead">Gõ tự nhiên bằng tiếng Việt. Claude luôn hỏi xác nhận trước khi chạy.</p></div>
   <div class="cmds">
     <div class="cmd glass reveal"><span class="k">@khởi tạo dự án</span><span class="d">Setup toàn bộ hệ thống lần đầu</span></div>
-    <div class="cmd glass reveal"><span class="k">quét jira</span><span class="d">Quét toàn bộ project Jira/Atlassian → vault (mỗi project một thư mục)</span></div>
-    <div class="cmd glass reveal"><span class="k">quét task FA-102</span><span class="d">Quét riêng vài issue/epic, merge vào vault</span></div>
-    <div class="cmd glass reveal"><span class="k">đặt lịch quét jira</span><span class="d">Tự động đồng bộ issue mới định kỳ (incremental --since)</span></div>
+    <div class="cmd glass reveal"><span class="k">quét jira</span><span class="d">Quét nhiều nguồn Jira (Server + Cloud), mỗi nguồn sync riêng → vault (mỗi project một thư mục)</span></div>
+    <div class="cmd glass reveal"><span class="k">quét task PROJ-102</span><span class="d">Quét riêng vài issue/epic, merge vào vault</span></div>
+    <div class="cmd glass reveal"><span class="k">đặt lịch quét jira</span><span class="d">Lịch tự đồng bộ, chỉ lấy issue mới (incremental); chạy bù khi mở app</span></div>
     <div class="cmd glass reveal"><span class="k">tiến hóa KB</span><span class="d">Dựng lại chỉ mục, báo sức khỏe, dọn dead-link, học từ lỗi</span></div>
     <div class="cmd glass reveal"><span class="k">thiết kế &lt;tính năng&gt;</span><span class="d">Sinh design brief → dựng prototype liên kết trên Claude Design</span></div>
     <div class="cmd glass reveal"><span class="k">xuất tài liệu</span><span class="d">Tạo URD/SRS dạng DOCX/PDF cho người đọc</span></div>
     <div class="cmd glass reveal"><span class="k">đổi domain / sửa rule</span><span class="d">Đổi rule phân tích bất cứ lúc nào</span></div>
+    <div class="cmd glass reveal"><span class="k">cập nhật phiên bản</span><span class="d">So phiên bản với bản mới nhất → cập nhật phần lõi, giữ nguyên tri thức</span></div>
+    <div class="cmd glass reveal"><span class="k">sao lưu / chuyển máy</span><span class="d">Đóng gói toàn bộ tri thức thành 1 file zip để mang đi</span></div>
+    <div class="cmd glass reveal"><span class="k">nhập tri thức</span><span class="d">Bung gói zip về máy mới (base sạch) → dùng lại y như cũ</span></div>
   </div>
-  <div class="note reveal"><b>⚠ Lưu ý lịch tự đồng bộ</b><p>Scheduled task chỉ <b>tự quét được khi Jira là Cloud/Atlassian hoặc public</b>. Với Jira nội bộ/VPN, lịch chỉ <b>nhắc bạn</b> chạy file <code>quet-jira.command</code> / <code>.bat</code>.</p></div>
+  <div class="note reveal"><b>⚠ Lưu ý lịch tự đồng bộ</b><p>Lịch <b>chạy bù khi mở app</b>: nếu đến hẹn mà máy tắt, lần mở app kế tiếp sẽ tự quét, và chỉ <b>lấy issue mới</b> (incremental). Với Jira nội bộ/VPN, lịch <b>nhắc bạn</b> chạy <b>lệnh Terminal</b> (điền sẵn đường dẫn) để quét.</p></div>
 </section>
 
 <section id="benefit" data-scene="benefit">
@@ -260,36 +363,44 @@
     <div class="ben glass reveal"><div class="ico">🎯</div><h4>Không lạc lối</h4><p>Chỉ nạp đúng phần tri thức liên quan — tiết kiệm token, tránh suy diễn lan man.</p></div>
     <div class="ben glass reveal"><div class="ico">🔒</div><h4>Con người quyết định</h4><p>Không tri thức nào vào kho khi chưa duyệt. Mọi thay đổi để lại dấu vết changelog.</p></div>
     <div class="ben glass reveal"><div class="ico">♻️</div><h4>Tự hoàn thiện</h4><p>Sau mỗi phiên tự rút ra tri thức mới, học từ sai lầm — ngày một đáng tin hơn.</p></div>
+    <div class="ben glass reveal"><div class="ico">🗂️</div><h4>Đa nguồn Jira</h4><p>Gộp tri thức từ nhiều Jira (Server + Cloud) cùng lúc — mỗi nguồn đồng bộ riêng, không trộn lẫn dữ liệu.</p></div>
+    <div class="ben glass reveal"><div class="ico">👁️</div><h4>Đọc hiểu cả sơ đồ</h4><p>Import Word/PDF và <b>hiểu sơ đồ sequence bằng vision</b> — không bỏ sót luồng nghiệp vụ nằm trong hình.</p></div>
   </div>
+</section>
+
+<section id="download" data-scene="evolve">
+  <div class="reveal"><div class="eyebrow" style="color:var(--green)">06 · Tải về & cập nhật</div>
+  <h2>Tải về & cập nhật</h2>
+  <p class="lead">Mang cả "bộ não" về máy bạn. Cập nhật phiên bản mới mà <b>không mất tri thức đã tích lũy</b> — vault và <code>.kb</code> của bạn luôn được giữ nguyên.</p></div>
+  <div class="cta" style="margin-top:30px">
+    <a href="https://github.com/luugiakhanh689/adaptive_knowledge_base/archive/refs/heads/release.zip" class="btn primary" target="_blank" rel="noopener">⬇ Tải về (.zip)</a>
+    <a href="https://github.com/luugiakhanh689/adaptive_knowledge_base" class="btn ghost" target="_blank" rel="noopener">&lt;/&gt; Mã nguồn</a>
+    <a href="https://github.com/luugiakhanh689/adaptive_knowledge_base/issues" class="btn ghost" target="_blank" rel="noopener">💬 Phản hồi</a>
+  </div>
+  <div class="grid2">
+    <div class="ben glass reveal s1"><div class="ico">🔄</div><h4>Cập nhật không mất tri thức</h4><p>Chạy <code>scripts/update.command</code> — chỉ thay phần <b>CORE</b> của hệ thống. Vault và <code>.kb</code> của bạn được giữ nguyên.</p></div>
+    <div class="ben glass reveal s2"><div class="ico">📦</div><h4>Dời máy dễ dàng</h4><p><code>export-kb.command</code> → gói thành <b>zip</b> → mang sang máy mới → <code>import-kb.command</code>. Tri thức theo bạn đi khắp nơi.</p></div>
+    <div class="ben glass reveal s3"><div class="ico">🗝️</div><h4>Tri thức là của bạn</h4><p>Mọi dữ liệu nằm <b>ngoài vùng cập nhật</b> và đã được <code>gitignore</code>. Không bị ghi đè, không rò rỉ lên repo.</p></div>
+  </div>
+  <div class="steps" style="margin-top:30px">
+    <div class="step reveal s1"><div class="ix">⬆</div><div class="body glass"><h4>Cập nhật phiên bản mới</h4><p>Mở thư mục dự án bằng <b>App Claude</b> (phần <b>Cowork</b>) → gõ <code>cập nhật phiên bản</code>. Hệ thống tự so phiên bản với bản mới nhất, cho xem "có gì mới", rồi <b>chỉ thay phần chương trình</b> — vault và <code>.kb</code> của bạn giữ nguyên. (Hoặc double-click <code>scripts/update.command</code>.)</p></div></div>
+    <div class="step reveal s2"><div class="ix">💾</div><div class="body glass"><h4>Sao lưu &amp; chuyển sang máy khác</h4><p><b>Máy cũ:</b> gõ <code>sao lưu</code> → hệ thống đóng gói toàn bộ tri thức thành 1 file <code>genesis1-kb-….zip</code>.<br><b>Máy mới:</b> tải base sạch → mở bằng <b>App Claude (Cowork)</b> → chép file zip vào thư mục dự án → gõ <code>nhập tri thức</code> → mọi thứ trở lại y như cũ (tự dựng lại chỉ mục).</p></div></div>
+  </div>
+  <div class="note reveal" style="border-color:rgba(45,212,191,.4);background:rgba(45,212,191,.08)"><b style="color:var(--teal)">💡 "Cowork" là gì?</b><p style="color:#cfe0f5">Là phần <b>Cowork</b> trong <b>App Claude</b> (Claude Desktop) — nơi làm việc cùng AI ngay trên thư mục dự án. Cách dùng: cài <b>App Claude</b> → mở phần <b>Cowork</b> → mở thư mục đã giải nén → gõ <code>@khởi tạo dự án</code>.</p></div>
+  <div class="note reveal"><b>♻ Quy trình an toàn</b><p>Phần lõi (CORE) và phần dữ liệu của bạn tách bạch hoàn toàn. Cập nhật chỉ đụng vào lõi — tri thức bạn dày công xây dựng không bao giờ bị động đến.</p></div>
 </section>
 
 <footer>
   <span class="fpt"><span class="marks"><span class="pl b"><span class="face"><b>F</b></span></span><span class="pl o"><span class="face"><b>P</b></span></span><span class="pl g"><span class="face"><b>T</b></span></span></span><span class="isc">ISC</span></span><br><br>
   Adaptive Knowledge Base — bản đang xây dựng & hoàn thiện, sẵn sàng chia sẻ và demo.<br>
-  Mở trong Cowork → gõ <b>@khởi tạo dự án</b> để bắt đầu.
+  Mở bằng <b>App Claude → phần Cowork</b> → gõ <b>@khởi tạo dự án</b> để bắt đầu.<br>
+  Phiên bản: <b>Genesis-1 (v1.0.4)</b>
 </footer>
 </div>
 
-<script>
-/* ====== CẤU HÌNH VIDEO HƯỚNG DẪN ======
-   Điền MỘT trong hai:
-   - youtube: mã video YouTube (phần sau ?v= trong link). VD link
-     https://www.youtube.com/watch?v=ABC123  →  youtube:"ABC123"
-   - file: đường dẫn file mp4 đặt cùng repo, VD "videos/guide.mp4"
-   (Video nặng nên dùng YouTube để khỏi phình repo / vượt giới hạn GitHub.) */
-const VIDEO = { youtube:"", file:"videos/guide.mp4" };
-(function(){
-  const p=document.getElementById('player'); if(!p) return;
-  if(VIDEO.youtube){
-    p.innerHTML='<iframe src="https://www.youtube.com/embed/'+VIDEO.youtube+'?rel=0" title="Video hướng dẫn" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
-  } else if(VIDEO.file){
-    p.innerHTML='<video src="'+VIDEO.file+'" controls preload="metadata" playsinline></video>';
-  }
-})();
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches||innerWidth<760;
 const canvas=document.getElementById('bg');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
@@ -411,8 +522,9 @@ const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.targ
 document.querySelectorAll('section[data-scene]').forEach(s=>so.observe(s));
 
 // mobile menu
-const burger=document.getElementById('burger'),clips=document.getElementById('clips');
-burger.addEventListener('click',()=>{burger.classList.toggle('x');clips.style.display=clips.style.display==='flex'?'':'flex';});
+const burger=document.getElementById('burger'),navEl=document.querySelector('nav');
+burger.addEventListener('click',()=>{burger.classList.toggle('x');navEl.classList.toggle('open');});
+document.querySelectorAll('.clips .poly').forEach(a=>a.addEventListener('click',()=>{burger.classList.remove('x');navEl.classList.remove('open');}));
 </script>
 </body>
 </html>

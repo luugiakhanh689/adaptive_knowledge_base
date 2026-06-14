@@ -1,3 +1,4 @@
+# Copy thành factory-config.yaml khi setup. File factory-config.yaml là DATA của user (gitignore).
 # Cấu hình AI Product Factory — được điền tự động khi user chạy "@khởi tạo dự án".
 # Giá trị TODO nghĩa là CHƯA setup → Claude phải đề nghị user chạy setup trước.
 
@@ -9,7 +10,7 @@ language: vi              # ngôn ngữ tài liệu
 
 domain:
   preset: TODO            # healthcare | fintech | ecommerce | generic
-  description: TODO       # mô tả ngắn domain do user điền
+  description: TODO
   rules_file: config/domain-rules.md
 
 knowledge_base:
