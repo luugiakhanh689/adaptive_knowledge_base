@@ -14,7 +14,7 @@ Tài liệu dưới đây để hiểu/đối chiếu khi làm tay.
 
 ## Quy tắc 1 dòng
 
-- **Đổi `version.json` (tăng version) = PHÁT HÀNH APP** → app đã cài thấy bản mới khi gõ `cập nhật model`.
+- **Đổi `version.json` (tăng version) = PHÁT HÀNH APP** → app đã cài thấy bản mới khi gõ `cập nhật phiên bản`.
 - **KHÔNG đổi `version.json` = chỉ deploy landing** → web cập nhật, app đã cài KHÔNG báo có bản mới.
 
 GitHub Pages deploy lại web mỗi lần push (kể cả landing-only) — điều đó **bình thường và độc lập**
@@ -46,15 +46,41 @@ CORE = `workflows/`, `tools/`, `CLAUDE.md`, `scripts/`, `templates/`, `config/do
    - `1.0.0 → 1.1.0` — **thêm tính năng** (minor).
    - `1.0.0 → 2.0.0` — **thay đổi phá vỡ / cần migration** (major).
    - Đổi `released` = ngày phát hành. `codename` giữ `"Genesis-1"` đến đời lớn kế tiếp.
+2b. **Đồng bộ nhãn version trên landing `index.html`** theo version mới: thẻ `mc-ver` +
+   footer `Phiên bản: Genesis-1 (vX.Y.Z)`. (Quên → web hiện version cũ. Soát:
+   `grep -n 'mc-ver\|Phiên bản:' index.html`.)
 3. **Thêm mục vào `CHANGELOG.md`**: từ vX → vY có gì mới. Nếu cần user/Claude thao tác thêm
    (migration: đổi cấu trúc config/vault…) → ghi RÕ các bước ở đây — `workflows/10-update.md`
    sẽ đọc CHANGELOG để biết "cần làm những gì" và làm theo.
 4. `git commit && git push origin release`.
    (Tùy chọn đánh dấu bản phát hành: `git tag vX.Y.Z-genesis-1 && git push origin vX.Y.Z-genesis-1`.)
 
-→ App đã cài: user gõ **`cập nhật model`** → so `version.json` local với `release` → thấy mới hơn →
+→ App đã cài: user gõ **`cập nhật phiên bản`** → so `version.json` local với `release` → thấy mới hơn →
    xem "có gì mới" từ CHANGELOG → confirm → tải CORE mới, **GIỮ nguyên tri thức (DATA)**.
    Pages cũng tự deploy web mới luôn.
+
+---
+
+## C. Force update + nội dung giới thiệu (thông báo cho app bản cũ)
+
+`version.json` có 2 field tùy chọn để chủ động báo cho người dùng bản cũ:
+
+```json
+{
+  "version": "1.0.2",
+  "force": false,
+  "intro": "Mô tả ngắn bản này có gì — hiện cho user khi họ kiểm tra cập nhật."
+}
+```
+
+- **`force`** (bool, mặc định `false`): `true` = bản BẮT BUỘC / ưu tiên cập nhật → khi user bản
+  cũ kiểm tra, `workflows/10-update.md` hiện khung **"🔴 Bản cập nhật quan trọng"** + lời lẽ mạnh
+  hơn (vẫn chờ user đồng ý, không tự ép).
+- **`intro`** (string, mặc định `""`): nội dung giới thiệu hiện **nổi bật đầu tiên** khi user bản
+  cũ kiểm tra cập nhật (kèm tóm tắt CHANGELOG + cách nâng cấp).
+- **Khi nào user thấy?** Theo thiết kế hiện tại: **chỉ khi user chủ động** gõ "cập nhật phiên bản" /
+  "kiểm tra phiên bản" (KHÔNG nag tự động mỗi phiên).
+- Lúc phát hành, `workflows/12-release.md` Bước 1b hỏi force? + nội dung giới thiệu rồi ghi 2 field này.
 
 ---
 
