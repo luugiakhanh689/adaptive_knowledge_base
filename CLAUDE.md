@@ -114,17 +114,20 @@ Mục tiêu: user KHÔNG cần thuộc lệnh nào — chỉ nói bằng lời t
 6. **Không lưu secret.** Token/password chỉ nằm trong `tools/jira-to-obsidian/.env.local`
    (đã gitignore). Không in token ra log/chat.
 7. **Mọi thay đổi ghi changelog** vào `.kb/changelog.md` (ngày, source, file, lý do, người duyệt).
-8. **Hỏi bằng lựa chọn — ĐÚNG loại câu hỏi.** Cần user CHỌN giữa các phương án rõ ràng
-   (2–4 lựa chọn) → dùng AskUserQuestion kèm mô tả. **TUYỆT ĐỐI KHÔNG** dùng AskUserQuestion
-   cho **input TỰ DO** (tên project, URL, mô tả, danh sách mã…): nó cần options cố định, đưa
-   câu tự do vào sẽ **LỖI ("Failed")**. Input tự do → hỏi thẳng bằng câu thường trong chat
-   (kèm ví dụ + giá trị mặc định nếu có). **Trường hợp LAI** (một lựa chọn dẫn tới phải nhập
-   giá trị tự do — vd "Tạo project mới", "Thêm nguồn Jira mới", "Đường dẫn khác", "Tần suất
-   khác"): AskUserQuestion CHỈ để chọn nhánh; SAU KHI user chọn, hỏi giá trị tự do
-   (tên/URL/đường dẫn/mã/cron) bằng CÂU THƯỜNG ở lượt kế — KHÔNG nhồi vào cùng AskUserQuestion.
-   **🔑 Mở đầu MỌI quyết định bằng AskUserQuestion**, kể cả câu sẽ dẫn tới nhập tự do: KHÔNG hỏi
-   thẳng kiểu free-text trống ("muốn thêm/bớt rule nào?", "đặt lịch không?") — khung thành thẻ
-   trước (tối thiểu **Có/Không**), user chọn nhánh-cần-nhập thì MỚI hỏi giá trị tự do ở lượt kế.
+8. **Hỏi bằng THẺ CHỌN — kể cả khi nhập liệu.** Cần user CHỌN giữa phương án rõ ràng (2–4 lựa
+   chọn) → dùng AskUserQuestion kèm mô tả.
+   **Input TỰ DO không nhạy cảm** (tên project, đường dẫn, tên thư mục, mô tả ngắn): **VẪN dùng
+   AskUserQuestion** — đưa vài **GỢI Ý** làm option + để user bấm ô **"Other" (ô trống)** tự gõ
+   giá trị thật. **KHÔNG bắt user gõ vào chat** khi có thể hiện thẻ.
+   ⚠️ Trước đây tưởng AskUserQuestion "Failed" với input tự do — thực ra do **thiếu option cố
+   định / nhồi câu tự do vào option**, KHÔNG phải do bản chất. Cơ chế đúng: **gợi ý + ô "Other"**.
+   **NGOẠI LỆ — KHÔNG bao giờ đưa vào card:** token/secret/password → CHỈ nhập qua file
+   `.env.local` (không chat, không card); file tài liệu → kéo vào chat; danh sách rất dài.
+   **Trường hợp LAI** (một lựa chọn dẫn tới nhập giá trị tự do — vd "Tạo project mới", "Đường dẫn
+   khác"): AskUserQuestion để chọn nhánh; giá trị tự do nhập ở ô **"Other"** (hoặc lượt kế nếu cần).
+   **🔑 Mở đầu MỌI quyết định bằng AskUserQuestion** (kể cả câu dẫn tới nhập tự do) — KHÔNG hỏi
+   thẳng kiểu free-text trống ("muốn thêm/bớt rule nào?", "đặt lịch không?"). **Fallback:** nếu môi
+   trường thực sự không nhập được ô "Other" → mới hỏi câu thường.
 9. **Thao tác file phải có fallback.** Sandbox có thể bị chặn quyền xóa/đổi tên
    thư mục trong folder của user. Mọi `mv`/`rm`/rename phải: thử → lỗi thì dùng cách
    thay thế (tạo mới + copy, hoặc giữ nguyên tên và chỉ cập nhật config) → tệ nhất
