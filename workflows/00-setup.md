@@ -4,11 +4,14 @@
 > user confirm hoặc tự điền rồi mới sang bước kế. Kết quả cuối: `config/factory-config.yaml`
 > được điền đầy đủ, KB sẵn sàng nhận yêu cầu.
 >
-> ⛔ **BẮT BUỘC — MỖI BƯỚC LÀ MỘT LẦN HỎI:** setup đi TỪNG BƯỚC, mỗi bước **DỪNG LẠI hỏi user**
-> (AskUserQuestion cho lựa chọn hữu hạn / câu thường cho input tự do) rồi **CHỜ user trả lời**
-> mới sang bước kế. **TUYỆT ĐỐI KHÔNG**: tự chọn mặc định thay user, gộp nhiều bước vào một lượt,
-> hay chạy thẳng tới cuối. Rule "tự chạy không hỏi" (CLAUDE.md §0.1 Tầng A) **CHỈ** dành cho
-> phân tích read-only — **KHÔNG áp cho setup**. Thà hỏi thừa còn hơn tự quyết thay user.
+> ⛔ **BẮT BUỘC — MỖI BƯỚC LÀ MỘT LẦN HỎI:** setup đi TỪNG BƯỚC, mỗi bước **DỪNG LẠI hỏi user
+> bằng AskUserQuestion** (lựa chọn hữu hạn LẪN nhập liệu — input tự do thì dùng **gợi ý + ô
+> "Other"** để user gõ, KHÔNG bắt gõ vào chat) rồi **CHỜ user trả lời** mới sang bước kế.
+> **TUYỆT ĐỐI KHÔNG**: tự chọn mặc định thay user, gộp nhiều bước vào một lượt, hay chạy thẳng tới
+> cuối. Rule "tự chạy không hỏi" (CLAUDE.md §0.1 Tầng A) **CHỈ** dành cho phân tích read-only —
+> **KHÔNG áp cho setup**. Thà hỏi thừa còn hơn tự quyết thay user.
+> 📋 **Task tracker:** dùng danh sách bước thì **tick từng bước khi xong** và **đóng Bước 7
+> (cả danh sách) khi setup hoàn tất** — không để bước nào treo (xem Bước 7 mục 0).
 >
 > 🟦 **Cách HỎI (rule §1.8) — áp cho mọi bước:** mỗi khi có **lựa chọn hữu hạn (2–4 phương án)**
 > → **BẮT BUỘC dùng AskUserQuestion** (thẻ bấm được), KHÔNG bắt user gõ trả lời trong chat.
@@ -52,9 +55,11 @@ Hành động sau khi chọn:
 
 ## Bước 2 — Tên project & ngôn ngữ
 
-- **Tên project** là input TỰ DO → hỏi bằng **câu thường** (TUYỆT ĐỐI KHÔNG dùng AskUserQuestion,
-  sẽ báo "Failed"): *"Tên sản phẩm/project của bạn là gì? (tên ngắn gọn — vd: MyApp, ShopX, TaskFlow…)"*
-  → chờ user gõ tên.
+- **Tên project** → **dùng AskUserQuestion** (KHÔNG bắt gõ vào chat): câu hỏi *"Tên sản phẩm/project
+  của bạn là gì?"* + đưa **vài GỢI Ý tên ví dụ theo domain** làm option (vd Healthcare:
+  `HealthTrack` / `MedCare` / `CarePlus`; domain khác tự chỉnh cho hợp) — user bấm ô **"Other"**
+  gõ **tên thật** vào ô trống. (Đa số sẽ dùng "Other"; gợi ý chỉ để tham khảo.)
+  *Fallback:* nếu môi trường không nhập được ô "Other" → mới hỏi câu thường.
 - **Ngôn ngữ tài liệu**: mặc định **Tiếng Việt**; nếu cần hỏi → **dùng AskUserQuestion**
   (2 lựa chọn: Tiếng Việt / English), KHÔNG hỏi trong chat.
 - Ghi vào `factory-config.yaml` (`project_name`, `language`).
@@ -66,8 +71,10 @@ Hỏi:
 > "Tri thức sẽ được lưu thành Obsidian vault (các file .md có backlink).
 > Bạn muốn đặt vault ở đâu?"
 
-**→ Dùng AskUserQuestion** (3 nhánh). Nhánh 2 & 3 là **ca LAI**: sau khi user chọn mới hỏi
-đường dẫn folder bằng **câu thường** ở lượt kế (KHÔNG nhồi đường dẫn vào AskUserQuestion):
+**→ Dùng AskUserQuestion** (3 nhánh). Nhánh 2 & 3 là **ca LAI**: sau khi user chọn, hỏi đường dẫn
+folder bằng **AskUserQuestion khác** — gợi ý vài đường dẫn thường gặp làm option (vd thư mục
+project hiện tại, `~/Documents/<TênProject>_Brain`, `~/Obsidian/<TênProject>`) + ô **"Other"** để
+user dán **đường dẫn thật**. KHÔNG bắt gõ vào chat (fallback câu thường nếu ô Other lỗi):
 
 1. **Tạo mới trong project này, tên `<TênProject>_Brain`** (mặc định, khuyến nghị) —
    Claude đổi tên thư mục `Project_Name_Brain/` theo tên project đã chọn ở Bước 2
@@ -84,10 +91,12 @@ Hỏi:
      tên cứng). Nhắc user: muốn đổi tên thì đổi trong Finder rồi nhắn để cập nhật config.
 2. **Dùng vault Obsidian có sẵn** — user dán đường dẫn folder vault; Claude kiểm tra
    folder tồn tại, hỏi có muốn tạo sub-folder riêng cho project không.
-3. **Đường dẫn khác** — user tự điền.
+3. **Đường dẫn khác** — chọn xong, hỏi đường dẫn bằng AskUserQuestion + ô **"Other"** (như trên).
 
 Hỏi tiếp — **→ dùng AskUserQuestion** (2 lựa chọn: **Dùng tên mặc định** / **Đặt tên khác**).
-Chọn "Đặt tên khác" = **ca LAI** → hỏi tên thư mục tùy biến bằng **câu thường** ở lượt kế:
+Chọn "Đặt tên khác" = **ca LAI** → hỏi tên thư mục tùy biến bằng **AskUserQuestion**: gợi ý bộ
+tên mặc định (`00_Index`, `02_Epics`…) làm tham khảo + ô **"Other"** để nhập tên tùy biến (KHÔNG
+bắt gõ vào chat; fallback câu thường nếu lỗi):
 
 > "Cấu trúc thư mục trong vault dùng tên mặc định (00_Index, 02_Epics, 03_UserStories...)
 > hay bạn muốn đặt tên khác?" — đa số chọn mặc định; nếu đổi → ghi vào
@@ -160,6 +169,10 @@ bằng **câu thường** ở lượt kế (KHÔNG nhồi tên/mô tả vào Ask
 
 ## Bước 7 — Tổng kết & kích hoạt
 
+0. ✅ **ĐÓNG TASK TRACKER:** ngay khi làm xong Bước 7 và đã đặt `setup_completed: true`, **đánh
+   dấu Bước 7 + TOÀN BỘ danh sách bước = HOÀN THÀNH** trong trình theo dõi tiến độ (TaskUpdate →
+   `completed`). TUYỆT ĐỐI không để Bước 7 treo "chưa hoàn thành", **kể cả khi user yêu cầu chạy
+   thẳng một mạch tới cuối** — chạy tới đâu tick tới đó, xong Bước 7 thì đóng cả danh sách.
 1. Điền nốt `factory-config.yaml`, đặt `setup_completed: true` + ngày giờ.
 2. Chạy lập chỉ mục: `python3 tools/kb-indexer/build_index.py --root .` → tự dựng
    `.kb/index.json`, `.kb/relation-graph.json`, `.kb/health-report.md`. Báo nhanh
