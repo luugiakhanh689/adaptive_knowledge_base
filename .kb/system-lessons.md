@@ -16,6 +16,15 @@
 - **Rút ra:** Input TỰ DO (tên/URL/đường dẫn/mã/cron) luôn hỏi câu thường; AskUserQuestion chỉ để
   chọn nhánh hữu hạn. Lựa chọn dẫn tới nhập tự do → hỏi giá trị ở lượt kế bằng câu thường.
 
+## 2026-06-14 — ĐÍNH CHÍNH: AskUserQuestion CÓ nhận free text qua ô "Other"
+- **Sai gì:** Kết luận bài học trên ("luôn hỏi câu thường cho input tự do") là **over-correction**.
+  User phản hồi: bắt gõ vào chat trải nghiệm kém — muốn hiện THẺ có gợi ý + ô trống để nhập.
+- **Sửa gì:** Nguyên tắc 8 viết lại — **input tự do KHÔNG nhạy cảm vẫn dùng AskUserQuestion: đưa
+  gợi ý làm option + ô "Other" để user tự gõ**. "Failed" trước kia là do thiếu option cố định,
+  không phải bản chất. Workflow 00 Bước 2/3 đổi sang card-gợi-ý-+-Other (fallback câu thường nếu lỗi).
+- **Rút ra:** AskUserQuestion = option cố định + ô "Other" (free text). Dùng cho cả nhập liệu
+  không nhạy cảm. **NGOẠI LỆ tuyệt đối:** token/secret KHÔNG đưa vào card (nhập qua `.env.local`).
+
 ## 2026-06-14 — "quét jira" thiếu chọn nguồn/domain
 - **Sai gì:** Workflow 01 khóa cứng `.env.local`, không lộ cơ chế đa nguồn (đã có trong code) ra lúc quét.
 - **Sửa gì:** Thêm Bước 0 chọn nguồn/domain (Server nội bộ / Cloud Atlassian) + `JIRA_ENV_FILE`.
