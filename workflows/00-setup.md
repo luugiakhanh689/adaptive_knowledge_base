@@ -64,11 +64,23 @@ Hành động sau khi chọn:
   (2 lựa chọn: Tiếng Việt / English), KHÔNG hỏi trong chat.
 - Ghi vào `factory-config.yaml` (`project_name`, `language`).
 
-## Bước 3 — Nơi lưu tri thức (Obsidian vault)
+## Bước 3 — Nơi lưu tri thức (vault)
 
-Hỏi:
+> 💡 **Obsidian là TÙY CHỌN — KHÔNG bắt buộc.** Vault chỉ là một **thư mục các file `.md`**.
+> Claude và MỌI tính năng (quét Jira, phân tích, xuất tài liệu, cập nhật…) chạy bình thường
+> mà **không cần Obsidian**. Obsidian chỉ giúp **xem backlink trực quan**; không có nó thì vẫn
+> mở folder bằng VS Code / editor markdown bất kỳ (backlink `[[...]]` hiện dạng text, không click được).
 
-> "Tri thức sẽ được lưu thành Obsidian vault (các file .md có backlink).
+**Trước tiên → dùng AskUserQuestion:** *"Bạn đã cài Obsidian chưa?"* → **[Đã cài]** / **[Chưa cài /
+không dùng Obsidian]**.
+- **Chưa cài + muốn dùng** → gợi ý tải tại **https://obsidian.md** (có cho macOS / Windows / Linux),
+  cài xong → "Open folder as vault". (Vẫn tiếp tục setup ngay, không bắt chờ cài.)
+- **Chưa cài / không dùng** → **vẫn tiếp tục bình thường**; cuối Bước 3 chỉ cần mở folder vault bằng
+  editor markdown bất kỳ. KHÔNG để việc thiếu Obsidian chặn setup.
+
+Hỏi nơi lưu:
+
+> "Tri thức sẽ được lưu thành vault (thư mục các file .md có backlink).
 > Bạn muốn đặt vault ở đâu?"
 
 **→ Dùng AskUserQuestion** (3 nhánh). Nhánh 2 & 3 là **ca LAI**: sau khi user chọn, hỏi đường dẫn
@@ -83,13 +95,14 @@ user dán **đường dẫn thật**. KHÔNG bắt gõ vào chat (fallback câu 
 
    ⚠️ **Thao tác đổi tên/xóa thư mục trong sandbox CÓ THỂ bị chặn quyền** — phải làm
    theo thứ tự fallback, TUYỆT ĐỐI KHÔNG để setup fail giữa chừng:
-   - (a) Thử `mv Project_Name_Brain <TênProject>_Brain`.
-   - (b) `mv` lỗi → tạo thư mục mới `<TênProject>_Brain` + copy nội dung sang;
-     báo user tự xóa thư mục cũ trong Finder (sandbox không có quyền xóa).
+   - (a) Thử đổi tên **theo OS:** macOS/Linux `mv Project_Name_Brain <TênProject>_Brain`;
+     **Windows (PowerShell)** `Rename-Item Project_Name_Brain <TênProject>_Brain` (hoặc `Move-Item`).
+   - (b) Lỗi → tạo thư mục mới `<TênProject>_Brain` + copy nội dung sang;
+     báo user tự xóa thư mục cũ (Finder trên macOS / Explorer trên Windows — sandbox không có quyền xóa).
    - (c) Cả hai lỗi → GIỮ NGUYÊN tên `Project_Name_Brain`, chỉ ghi đúng `vault_path`
      vào config (tên thư mục chỉ là nhãn — mọi workflow đọc `vault_path`, không đọc
-     tên cứng). Nhắc user: muốn đổi tên thì đổi trong Finder rồi nhắn để cập nhật config.
-2. **Dùng vault Obsidian có sẵn** — user dán đường dẫn folder vault; Claude kiểm tra
+     tên cứng). Nhắc user: muốn đổi tên thì đổi trong Finder (macOS) / Explorer (Windows) rồi nhắn để cập nhật config.
+2. **Dùng vault có sẵn** — user dán đường dẫn folder vault; Claude kiểm tra
    folder tồn tại, hỏi có muốn tạo sub-folder riêng cho project không.
 3. **Đường dẫn khác** — chọn xong, hỏi đường dẫn bằng AskUserQuestion + ô **"Other"** (như trên).
 
@@ -108,7 +121,10 @@ Hành động:
 - Tạo cấu trúc vault theo `factory-config.yaml > knowledge_base.vault_structure`
   (KHÔNG hardcode tên thư mục):
 - Tạo `00_Index/Knowledge-Base.md` (mục lục) nếu chưa có.
-- Hướng dẫn user: mở Obsidian → "Open folder as vault" → chọn đường dẫn trên.
+- Hướng dẫn user mở vault **theo lựa chọn ở đầu Bước 3**:
+  - **Dùng Obsidian** → mở Obsidian → "Open folder as vault" → chọn đường dẫn trên.
+  - **Không dùng Obsidian** → mở folder `<vault_path>` bằng VS Code / editor markdown bất kỳ
+    (Finder/Explorer cũng xem được các file `.md`). Mọi tính năng vẫn chạy bình thường.
 
 ## Bước 4 — Quét tài liệu Jira?
 
@@ -174,7 +190,7 @@ bằng **câu thường** ở lượt kế (KHÔNG nhồi tên/mô tả vào Ask
    `completed`). TUYỆT ĐỐI không để Bước 7 treo "chưa hoàn thành", **kể cả khi user yêu cầu chạy
    thẳng một mạch tới cuối** — chạy tới đâu tick tới đó, xong Bước 7 thì đóng cả danh sách.
 1. Điền nốt `factory-config.yaml`, đặt `setup_completed: true` + ngày giờ.
-2. Chạy lập chỉ mục: `python3 tools/kb-indexer/build_index.py --root .` → tự dựng
+2. Chạy lập chỉ mục: `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) → tự dựng
    `.kb/index.json`, `.kb/relation-graph.json`, `.kb/health-report.md`. Báo nhanh
    sức khỏe KB ban đầu cho user.
 3. Ghi dòng đầu vào `.kb/changelog.md`.

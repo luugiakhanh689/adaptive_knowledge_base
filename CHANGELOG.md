@@ -10,6 +10,16 @@
 
 ---
 
+## v1.0.7 "Genesis-1" — 2026-06-14
+
+- **Obsidian là TÙY CHỌN:** setup (`workflows/00-setup.md` Bước 3) giờ HỎI "đã cài Obsidian chưa?"
+  trước, gợi ý cài nếu cần, và nói rõ hệ thống chạy bình thường KHÔNG cần Obsidian (vault chỉ là
+  thư mục `.md`; mở bằng editor markdown bất kỳ). Ghi rõ ở README + landing.
+- **OS-dynamic toàn repo:** thêm nguyên tắc 12 trong `CLAUDE.md` (python3↔`py`, `mv`↔`Move-Item`,
+  path `/`↔`\`, mở folder/file ẩn theo OS). Mọi lệnh `python3 build_index.py` nêu biến thể Windows
+  `py`; Bước 3 đổi tên thư mục có lệnh PowerShell; `scripts/update.bat` sửa `python3`→`py`.
+- (Không có migration DATA → cập nhật giữ nguyên tri thức của bạn.)
+
 ## v1.0.6 "Genesis-1" — 2026-06-14
 
 - **Sau khi quét Jira → gợi ý nạp thêm nguồn:** `workflows/01-import-jira.md` Bước 5 giờ hỏi 4
