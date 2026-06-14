@@ -88,7 +88,7 @@ KHÔNG ghi bất cứ gì vào `docs/` hay vault khi user chưa chọn [A]/[B].
 1. Ghi vào `docs/` đúng vị trí (feature → `docs/03-features/F-xxx/source/`,
    domain → `docs/01-domain/`, thuật ngữ → `docs/08-glossary/`...).
 2. Tạo/cập nhật notes trong Obsidian vault + backlink.
-3. Chạy `python3 tools/kb-indexer/build_index.py --root .` (tự dựng lại `index.json` +
+3. Chạy `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) (tự dựng lại `index.json` +
    `relation-graph.json` + `health-report.md` khớp `docs/` vừa ghi) → cập nhật
    `source-registry.json`, `changelog.md`. Nếu trong phiên có tài liệu bị từ chối/sửa
    lớn → ghi `.kb/lessons.md` (§0.3).

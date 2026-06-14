@@ -219,7 +219,7 @@ Script tự tạo trong vault: notes Project/Epic/Story/Task/Bug/Sub-task có ba
    - **[D] Để raw đó**, phân loại sau theo từng yêu cầu.
 3. Merge `_system/*.json` của vault vào `.kb/relation-graph.json` + `.kb/source-registry.json`
    (đánh dấu `status: raw`).
-4. Chạy `python3 tools/kb-indexer/build_index.py --root .` → index/graph/health phản ánh
+4. Chạy `python3 tools/kb-indexer/build_index.py --root .` (Windows: `py`) → index/graph/health phản ánh
    NGAY dữ liệu vault vừa quét, để auto-phân tích (Tầng A) có dữ liệu tra cứu, khỏi grep chay.
 5. Ghi changelog.
 

@@ -149,6 +149,14 @@ Mục tiêu: user KHÔNG cần thuộc lệnh nào — chỉ nói bằng lời t
    / `config/domain-rules.md` / `.env.local`, do user chọn lúc setup và đổi được bất cứ
    lúc nào. Workflow nào cần giá trị → đọc config trước, KHÔNG dùng giá trị viết cứng;
    thiếu config → hỏi user rồi ghi vào config để lần sau dùng lại.
+12. **OS-dynamic — mọi lệnh/CHECK sinh cho USER chạy phải khớp OS** (macOS / Linux / Windows):
+   - **Python:** macOS/Linux `python3`; **Windows `py`** (hoặc `python`). Không chắc OS → hỏi 1 câu.
+   - **Shell:** `mv`→Windows `Move-Item`/`Rename-Item`; `rm`→`Remove-Item`; path `/` (Unix) vs `\` (Win).
+   - **Mở folder:** macOS Finder `Cmd+Shift+G` / Windows Explorer thanh địa chỉ; **file ẩn:** macOS
+     `Cmd+Shift+.` / Windows Explorer mặc định hiện.
+   - Lệnh **chỉ mục** `python3 tools/kb-indexer/build_index.py` do **Claude chạy trong sandbox**
+     (luôn có `python3`); CHỈ khi hướng dẫn USER chạy tay (sandbox bị chặn) mới đổi sang Windows `py`.
+   - Sinh lệnh đúng OS ngay từ đầu, đừng để user gặp "command not found".
 
 ---
 

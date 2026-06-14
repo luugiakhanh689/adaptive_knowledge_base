@@ -111,7 +111,7 @@ echo.
 echo Phien ban moi: v%NEW_VER%
 echo.
 echo [GOI Y] Neu phan dung index (kb-indexer) co thay doi, hay chay lai:
-echo     python3 tools\kb-indexer\build_index.py --root .
+echo     py tools\kb-indexer\build_index.py --root .
 
 :end
 echo.

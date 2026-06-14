@@ -59,7 +59,7 @@ import Word/PDF, tự phân tích xung đột, tự học, tự reindex.
 - `workflows/` — kịch bản từng luồng, chạy step-by-step
 - `config/` — domain + rules **động**, đổi được mọi lúc
 - `docs/` — Knowledge Base chính (chỉ ghi sau khi bạn duyệt)
-- `Project_Name_Brain/` — vault Obsidian, "bộ não" tri thức (setup tự đổi tên thành `<TênProject>_Brain`; mở bằng "Open folder as vault")
+- `Project_Name_Brain/` — vault "bộ não" tri thức = **thư mục các file `.md`** (setup tự đổi tên thành `<TênProject>_Brain`). **Obsidian là TÙY CHỌN** — hệ thống chạy bình thường không cần nó; Obsidian chỉ để xem backlink trực quan (mở bằng "Open folder as vault"), không có thì mở bằng VS Code / editor markdown bất kỳ.
 - `inbox/` — vùng đệm dữ liệu chưa duyệt
 - `projects/` — danh bạ các project Claude Design
 - `tools/jira-to-obsidian/` — tool quét Jira (script sẵn, chỉ điền `.env.local`)
@@ -68,7 +68,7 @@ import Word/PDF, tự phân tích xung đột, tự học, tự reindex.
 
 ## Quét Jira — những điều nên biết
 
-- Kết quả lưu vào thư mục vault (`vault_path` trong config) — mở bằng Obsidian.
+- Kết quả lưu vào thư mục vault (`vault_path` trong config) — mở bằng Obsidian (tùy chọn) hoặc editor markdown bất kỳ.
 - Mặc định **mỗi project Jira một thư mục riêng** tên `KEY_Tên-project` (vd `PROJ_MyApp/`);
   đổi mẫu tên bằng `PROJECT_FOLDER_PATTERN`, tắt gom bằng `GROUP_BY_PROJECT=false` trong `.env.local`.
 - Quét lẻ vài task: `quét task PROJ-102` (merge vào vault, không đụng phần khác).
