@@ -1,7 +1,9 @@
 {
   "name": "Adaptive Knowledge Base",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "codename": "Genesis-1",
   "released": "2026-06-14",
-  "repo": "https://github.com/luugiakhanh689/adaptive_knowledge_base"
+  "repo": "https://github.com/luugiakhanh689/adaptive_knowledge_base",
+  "force": true,
+  "intro": "Bản v1.0.4: bước cài đặt giờ luôn hiện THẺ CHỌN bấm được ở mọi bước (kể cả thêm/bớt rule, đặt lịch) — không bắt bạn gõ tay khi chưa cần."
 }
