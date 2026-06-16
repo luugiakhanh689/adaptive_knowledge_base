@@ -18,12 +18,13 @@ Chỉ dùng thư viện chuẩn Python 3 — KHÔNG cần pip install gì.
 """
 
 import argparse
+import glob
 import html
 import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -130,6 +131,29 @@ def load_issues(vault):
     return issues
 
 
+def vault_freshness(vault, stale_after_days=1):
+    """Đọc mọi mốc last-import-*.txt trong vault → mốc mới nhất + cờ CŨ (so hôm nay)."""
+    marks = glob.glob(os.path.join(vault, "**", "last-import-*.txt"), recursive=True)
+    marks += glob.glob(os.path.join(vault, "**", "last-import.txt"), recursive=True)
+    best = ""
+    for p in marks:
+        try:
+            v = open(p, encoding="utf-8").read().strip()
+            if v > best:
+                best = v
+        except Exception:
+            pass
+    today = datetime.now().strftime("%Y-%m-%d")
+    age = None
+    if best:
+        try:
+            age = (date.today() - date.fromisoformat(best[:10])).days
+        except ValueError:
+            pass
+    is_stale = (not best) or (age is not None and age >= stale_after_days) or (best[:10] < today)
+    return {"last_import": best or None, "is_stale": is_stale, "age_days": age}
+
+
 # ── Tính metrics ──────────────────────────────────────────────────────────
 def _time_sum(items):
     return {
@@ -139,10 +163,18 @@ def _time_sum(items):
     }
 
 
+def issue_group(i, smap=None):
+    """Nhóm trạng thái: ưu tiên status_category (statusCategory Jira — tin cậy) rồi mới đoán theo tên."""
+    sc = i.get("status_category")
+    if sc in ("todo", "in_progress", "done"):
+        return sc
+    return status_group(i.get("status"), smap)
+
+
 def _status_breakdown(items, smap):
     g = {"todo": 0, "in_progress": 0, "done": 0}
     for i in items:
-        g[status_group(i.get("status"), smap)] += 1
+        g[issue_group(i, smap)] += 1
     return g
 
 
@@ -170,7 +202,7 @@ def compute(issues, smap, today):
             "issues": sorted([{
                 "key": i.get("jira_key"), "summary": i.get("_summary", ""),
                 "assignee": i.get("assignee", "—"), "status": i.get("status", ""),
-                "group": status_group(i.get("status"), smap),
+                "group": issue_group(i, smap),
                 "spent_s": int(i.get("time_spent_s") or 0), "est_s": int(i.get("time_estimate_s") or 0),
                 "story_points": i.get("story_points", ""),
             } for i in items], key=lambda x: x["group"]),
@@ -195,7 +227,7 @@ def compute(issues, smap, today):
     overdue, no_assignee, no_est = [], [], []
     for i in issues:
         dd = str(i.get("duedate") or "")[:10]
-        if dd and dd < today and status_group(i.get("status"), smap) != "done":
+        if dd and dd < today and issue_group(i, smap) != "done":
             overdue.append({"key": i.get("jira_key"), "summary": i.get("_summary", ""),
                             "assignee": i.get("assignee", "—"), "duedate": dd, "status": i.get("status", "")})
     for i in active:
@@ -288,6 +320,14 @@ def render_fragment(m, vault):
     gen = m["generated_at"][:16].replace("T", " ")
     note = "" if m["with_time"] else ('<div class="pr-warn">Chưa thấy dữ liệu thời gian — '
                                       'hãy <b>quét jira</b> lại bằng bản mới (v1.1.0+) để có est/log/remaining.</div>')
+    fresh = m.get("freshness") or {}
+    stale = ""
+    if fresh.get("is_stale"):
+        li = fresh.get("last_import") or "chưa rõ"
+        ag = fresh.get("age_days")
+        agtxt = f" ({ag} ngày trước)" if isinstance(ag, int) and ag > 0 else ""
+        stale = (f'<div class="pr-stale">⚠ DỮ LIỆU ĐÃ CŨ — cập nhật cuối: {esc(li)}{agtxt}. '
+                 f'Hãy làm mới dữ liệu rồi chạy lại "báo cáo tiến độ".</div>')
     style = f"""<style>
 .pr{{font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:{PAL['ink']};background:{PAL['deep']};
  padding:20px;border-radius:16px;line-height:1.5;font-size:14px}}
@@ -312,11 +352,13 @@ def render_fragment(m, vault):
 .pr-todo{{background:rgba(159,180,214,.18);color:{PAL['mut']}}}
 .pr-ul{{margin:6px 0 0;padding-left:18px}}.pr-ul li{{margin:3px 0;font-size:12.5px}}
 .pr-warn{{background:rgba(244,123,32,.12);border-left:3px solid {PAL['orange']};border-radius:0 8px 8px 0;padding:8px 12px;margin-top:10px;font-size:12.5px;color:#f0ddc4}}
+.pr-stale{{background:rgba(255,95,122,.14);border-left:3px solid {PAL['red']};border-radius:0 8px 8px 0;padding:9px 13px;margin:8px 0;font-size:13px;color:#ffc9d3;font-weight:600}}
 .pr-grid2{{display:grid;grid-template-columns:1fr 1fr;gap:12px}}@media(max-width:680px){{.pr-grid2{{grid-template-columns:1fr}}}}
 </style>"""
     return f"""{style}<div class="pr">
 <h1>📊 Báo cáo tiến độ dự án</h1>
 <div class="pr-sub">Vault: {esc(os.path.basename(vault.rstrip('/')))} · cập nhật {esc(gen)} (giờ UTC) · {m['total']} issue</div>
+{stale}
 {note}
 <div class="pr-kpis">{cards}</div>
 <h2>Tiến độ tổng thể</h2><div class="pr-card">{stacked(m['by_status_group'])}</div>
@@ -361,6 +403,12 @@ def main():
 
     today = datetime.now().strftime("%Y-%m-%d")
     m = compute(issues, smap, today)
+    stale_after = 1
+    if os.path.exists(cfg_path):
+        sm = re.search(r"stale_after_days:\s*(\d+)", open(cfg_path, encoding="utf-8").read())
+        if sm:
+            stale_after = int(sm.group(1))
+    m["freshness"] = vault_freshness(vault, stale_after)
     fragment = render_fragment(m, vault)
 
     out = args.out or os.path.join(REPO_ROOT, "reports")

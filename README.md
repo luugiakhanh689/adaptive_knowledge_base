@@ -50,7 +50,8 @@ import Word/PDF, tự phân tích xung đột, tự học, tự reindex.
 | `xuất tài liệu` | Tạo DOCX/PDF cho người đọc | workflows/06-export-docs.md |
 | `lên kế hoạch code <tính năng>` | Sinh implementation plan (cần BR/AC đã duyệt) | workflows/07-code-plan.md |
 | `đặt lịch quét jira` | Tự động đồng bộ issue mới định kỳ (incremental --since) | workflows/08-schedule-sync.md |
-| `báo cáo tiến độ` | Sinh dashboard tiến độ từ vault Jira (time/sprint active/assignee/rủi ro) — **UI inline trong Cowork** + file HTML, local no-server | workflows/14-progress-report.md |
+| `báo cáo tiến độ` | **Tự làm mới dữ liệu** (Cloud→kéo qua MCP; self-host→nhắc lệnh nếu cũ) rồi sinh dashboard (time/sprint active/assignee/rủi ro) — **UI inline Cowork** + file HTML, local no-server | workflows/14-progress-report.md |
+| `đặt lịch báo cáo` | Lịch 8:00 tự làm mới→report tiến độ (chạy bù, idempotent) | workflows/08-schedule-sync.md |
 | `tiến hóa KB` / `dọn dẹp KB` | Tự dựng lại chỉ mục, báo sức khỏe, dọn dead-link, hợp nhất trùng, học từ lỗi | workflows/09-evolve.md |
 | `đổi domain` / `sửa rule` | Đổi rule phân tích bất cứ lúc nào | workflows/00-setup.md mục B |
 
