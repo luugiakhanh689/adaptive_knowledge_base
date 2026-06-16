@@ -432,6 +432,11 @@ def _sprint_objs(f):
 def _active_sprint(f):
     objs = _sprint_objs(f)
     if not objs:
+        # Fallback: nhiều team đặt "Sprint XX" trong fixVersions (released=false ⇒ đang chạy)
+        for fv in f.get("fixVersions") or []:
+            nm = fv.get("name", "")
+            if nm.lower().startswith("sprint") and not fv.get("released"):
+                return {"name": nm, "state": "active", "start": None, "end": (fv.get("releaseDate") or "")[:10]}
         return None
     for s in objs:
         if s["state"] == "active":
@@ -461,8 +466,12 @@ def _story_points(f):
 
 
 def _machine_progress_fields(f):
-    """Dòng frontmatter MÁY-ĐỌC cho report: time(giây), story_points, sprint active."""
+    """Dòng frontmatter MÁY-ĐỌC cho report: status_category, time(giây), story_points, sprint active."""
     lines = []
+    sc = ((f.get("status") or {}).get("statusCategory") or {}).get("key", "")  # new|indeterminate|done
+    cat = {"new": "todo", "indeterminate": "in_progress", "done": "done"}.get(sc, "")
+    if cat:
+        lines.append(f"status_category: {cat}")
     est, spent, rem = _time_seconds(f)
     if est is not None:
         lines.append(f"time_estimate_s: {int(est)}")
@@ -688,6 +697,57 @@ def save_last_import():
         f.write(datetime.now().strftime("%Y-%m-%d %H:%M"))
 
 
+def _today():
+    return datetime.now().strftime("%Y-%m-%d")
+
+
+def _daily_success_path():
+    return os.path.join(VAULT, DIRS["system"], f"daily-sync-{_source_id()}-{_today()}.txt")
+
+
+def has_daily_success():
+    """Hôm nay đã đồng bộ thành công chưa (idempotent-per-day)."""
+    return os.path.exists(_daily_success_path())
+
+
+def mark_daily_success():
+    os.makedirs(os.path.dirname(_daily_success_path()), exist_ok=True)
+    with open(_daily_success_path(), "w", encoding="utf-8") as f:
+        f.write(datetime.now().isoformat())
+
+
+def freshness_info():
+    """{last_import, is_stale, age_days, done_today} — so mốc last-import với hôm nay."""
+    last = read_last_import()
+    info = {"last_import": last or None, "is_stale": True, "age_days": None,
+            "done_today": has_daily_success(), "today": _today()}
+    if last:
+        d = last[:10]
+        info["is_stale"] = d < _today()
+        try:
+            from datetime import date
+            info["age_days"] = (date.today() - date.fromisoformat(d)).days
+        except ValueError:
+            pass
+    return info
+
+
+def load_mcp_issues(path):
+    """Đọc issues từ file MCP đã lưu: {issues:{nodes:[...]}} | {issues:[...]} | {nodes:[...]} | [...]."""
+    data = json.load(open(path, encoding="utf-8"))
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        iss = data.get("issues")
+        if isinstance(iss, dict):
+            return iss.get("nodes", [])
+        if isinstance(iss, list):
+            return iss
+        if isinstance(data.get("nodes"), list):
+            return data["nodes"]
+    return []
+
+
 def load_json(path, default):
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
@@ -730,8 +790,13 @@ def run_single(jql):
     issues = fetch_by_jql(jql)
     if not issues:
         die("Không tìm thấy issue nào khớp. Kiểm tra key/JQL và quyền xem.")
-    print(f"  → {len(issues)} issues")
+    run_from_issues(issues)
 
+
+def run_from_issues(issues):
+    """Ghi danh sách issue (shape Jira REST 'fields') vào vault + merge graph. Dùng CHUNG cho
+    token (fetch_by_jql) lẫn MCP (--from-mcp) — issues đã có sẵn, KHÔNG fetch lại."""
+    print(f"  → {len(issues)} issues")
     fname_map = {i["key"]: safe_name(i["key"], i["fields"].get("summary", "")) for i in issues}
     nodes, edges, registry = [], [], []
     for i in issues:
@@ -741,12 +806,11 @@ def run_single(jql):
             PROJECT_NAMES[pkey] = proj["name"]
         write_issue(i, pkey, fname_map, nodes, edges, registry)
         print(f"  ✓ {i['key']} — {i['fields'].get('summary', '')}")
-
     root_dirs = [DIRS["index"], DIRS["system"]] if PER_PROJECT else ALL_DIRS
     for d in root_dirs:
         os.makedirs(os.path.join(VAULT, d), exist_ok=True)
     merge_system(nodes, edges, registry)
-    print(f"\nHoàn tất (chế độ quét lẻ, đã merge vào vault).\nVault: {os.path.abspath(VAULT)}")
+    print(f"\nHoàn tất (đã merge vào vault).\nVault: {os.path.abspath(VAULT)}")
 
 
 def run_full():
@@ -807,10 +871,39 @@ def main():
                          '--since (không tham số) = từ lần quét trước (đọc _system/last-import.txt)')
     ap.add_argument("--per-project", action="store_true",
                     help="Mỗi project một thư mục con trong vault (VAULT/<KEY>/...)")
+    ap.add_argument("--from-mcp", help="Nạp issues từ file JSON do MCP lưu (không cần token)")
+    ap.add_argument("--names", help="File JSON map field id→tên (cho --from-mcp)")
+    ap.add_argument("--check-fresh", action="store_true",
+                    help="In độ mới của vault (last-import vs hôm nay) dạng JSON rồi thoát")
+    ap.add_argument("--force", action="store_true", help="Bỏ qua guard idempotent-per-day")
     args = ap.parse_args()
+    global PER_PROJECT, FIELD_MAP
     if args.per_project:
-        global PER_PROJECT
         PER_PROJECT = True
+
+    # --check-fresh: chỉ đọc vault, KHÔNG cần token/cấu hình kết nối
+    if args.check_fresh:
+        print(json.dumps(freshness_info(), ensure_ascii=False))
+        return
+
+    # --from-mcp: nạp từ file MCP (Cloud) — KHÔNG cần token; tái dùng toàn bộ logic ghi note
+    if args.from_mcp:
+        if args.since is not None and has_daily_success() and not args.force:
+            print(f"Hôm nay ({_today()}) đã đồng bộ thành công → bỏ qua (dùng --force để ép).")
+            return
+        if args.names and os.path.exists(args.names):
+            try:
+                FIELD_MAP = dict(json.load(open(args.names, encoding="utf-8")))
+            except Exception:
+                pass
+        issues = load_mcp_issues(args.from_mcp)
+        if not issues:
+            die(f"Không có issue nào trong file {args.from_mcp}.")
+        print(f"Nạp {len(issues)} issue từ MCP file → vault...")
+        run_from_issues(issues)
+        save_last_import()
+        mark_daily_success()
+        return
 
     check_config()
     if args.test:
@@ -825,6 +918,9 @@ def main():
             print(f"  - {p['key']}: {p['name']}")
         return
     if args.since is not None:
+        if has_daily_success() and not args.force:
+            print(f"Hôm nay ({_today()}) đã đồng bộ thành công → bỏ qua (dùng --force để ép).")
+            return
         since = read_last_import() if args.since == "__last__" else args.since
         if not since:
             die("Chưa có mốc quét trước. Dùng --since YYYY-MM-DD cho lần đầu.")
@@ -834,6 +930,7 @@ def main():
         print(f"Quét issue cập nhật từ {since}...")
         run_single(f'{scope}updated >= "{since}" ORDER BY updated ASC')
         save_last_import()
+        mark_daily_success()
     elif args.keys:
         keys = ",".join(k.strip() for k in args.keys.split(",") if k.strip())
         run_single(f"key in ({keys})")

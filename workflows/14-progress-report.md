@@ -13,6 +13,30 @@
 - Khuyến nghị: nếu vault quét bằng bản < v1.1.0 (thiếu `time_*_s` / `sprint_state`) → nhắc **quét lại**
   để có đủ số liệu thời gian/sprint.
 
+## Bước 0.5 — LÀM MỚI dữ liệu trước khi report (Pha 2)
+
+Kiểm tra độ mới: `python3 tools/jira-to-obsidian/import_jira.py --check-fresh` (Windows `py`) → JSON
+`{last_import, is_stale, age_days, done_today}`. **`done_today:true` & `is_stale:false` → BỎ QUA làm mới**
+(dữ liệu đủ mới), sang Bước 1. Ngược lại, làm mới theo LOẠI Jira (đọc `JIRA_BASE_URL`/config):
+
+**A) Jira Cloud (`*.atlassian.net`, có MCP Atlassian):** tự kéo qua MCP → nạp vào vault → report:
+1. `since` = `last_import` (chưa có → kéo full).
+2. MCP `searchJiraIssuesUsingJql`: `project = <KEY> AND updated >= "<since>"` (hoặc `project=<KEY>` nếu
+   full), `fields:["*all"]`. Kết quả lớn MCP **tự lưu ra file** → dùng path đó; nhỏ (inline) → ghi ra
+   `reports/_mcp-pull.json`. (KHÔNG nạp cả khối vào ngữ cảnh — xử lý qua file.)
+3. Lấy map tên field 1 lần: `getJiraIssue` 1 issue `expand=names` → ghi `{id:name}` ra `reports/_mcp-names.json`.
+4. Nạp vào vault (tái dùng toàn bộ logic ghi note): `python3 tools/jira-to-obsidian/import_jira.py
+   --from-mcp <file> --names reports/_mcp-names.json --since` (cờ `--since` để bật idempotent-per-day).
+5. Reindex: `python3 tools/kb-indexer/build_index.py --root .`.
+> Phiên scheduled nền **thiếu MCP** → coi như không kéo được → xử như nhánh "cũ" của B (báo cũ + nhắc mở Cowork gõ "báo cáo tiến độ").
+
+**B) Jira self-host (token, MCP/nền KHÔNG tới host nội bộ):** KHÔNG tự kéo.
+- `is_stale:false` → report bình thường (Bước 1).
+- `is_stale:true` → **vẫn sinh report (dữ liệu CŨ, có banner)** ở Bước 1, RỒI in **lệnh terminal copy-paste**
+  điền sẵn đường dẫn thật (OS-dynamic) để user tự kéo:
+  `python3 "<TOOL_DIR>/import_jira.py" --since` (Windows `py "<TOOL_DIR>\import_jira.py" --since`).
+  Nhắc: "Chạy lệnh trên để cập nhật, rồi gõ **'báo cáo tiến độ'** lại → báo cáo mới." User kéo xong → chạy lại workflow.
+
 ## Bước 1 — Sinh số liệu + dashboard
 
 Chạy (Claude tự chạy trong sandbox; user chạy tay thì OS-dynamic — Windows `py`):
