@@ -51,3 +51,12 @@ design:
 code:
   enabled: false          # true nếu có repo code kết nối
   repo_path: ""
+
+reports:                  # Báo cáo tiến độ (workflow 14) — sinh local từ vault, KHÔNG server
+  output_dir: reports     # thư mục xuất dashboard HTML + JSON (DATA, gitignore)
+  scheduled: none         # none | <cron + task_id> — Pha 2: 8:00 tự pull→report (workflow 08)
+  # status_map (tùy chọn): map trạng thái Jira → nhóm done/in_progress/todo. Để trống = đoán theo từ khóa.
+  # status_map:
+  #   done: ["Done", "Closed", "Đã xong"]
+  #   in_progress: ["In Progress", "In Review", "Đang làm"]
+  #   todo: ["To Do", "Backlog", "Chưa làm"]
