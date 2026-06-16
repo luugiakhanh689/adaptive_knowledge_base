@@ -63,3 +63,21 @@ Mỗi nguồn = một file cấu hình riêng + một scheduled task riêng:
 
 Báo user: lịch đã đặt, chạy lúc nào, đồng bộ kiểu gì, đổi/huỷ bằng cách nào
 ("đổi lịch sync" / "huỷ lịch sync" → dùng update/list scheduled task).
+
+## Mục B — Đặt lịch BÁO CÁO tiến độ (trigger: "đặt lịch báo cáo")
+
+Lịch 8:00 **tự làm mới + sinh report tiến độ** (workflow 14). ✋ Tạo scheduled task là automation
+thường trực → **confirm trước khi tạo**.
+
+1. Hỏi tần suất (mặc định **8:00 mỗi sáng** `0 8 * * *`) như Bước 1.
+2. `mcp__scheduled-tasks__create_scheduled_task`, `notifyOnCompletion:true`, prompt đại ý:
+   > "Chạy `workflows/14-progress-report.md` chế độ TỰ ĐỘNG cho project này: làm mới dữ liệu
+   > (Cloud→kéo qua MCP nạp vault; self-host→`--check-fresh`, không tự kéo) → sinh report
+   > `reports/progress-report-latest.html`. Idempotent: hôm nay đã chạy thành công thì bỏ qua.
+   > Báo cho user: tiến độ tóm tắt + đường dẫn report. **Nếu KHÔNG làm mới được** (phiên nền thiếu
+   > MCP / Jira nội bộ không tới): vẫn sinh report (dữ liệu CŨ, có banner) + hướng dẫn cập nhật —
+   > Cloud: 'mở Cowork gõ báo cáo tiến độ'; self-host: lệnh terminal `import_jira.py --since`."
+3. Ghi `reports.scheduled` (cron + task_id) vào `factory-config.yaml`. Báo user cách đổi/huỷ.
+
+> ⏰ Chạy bù khi mở app (như lịch sync). Lịch nền dùng MCP có thể không ổn định → đã có nhánh
+> "báo cũ + hướng dẫn" để không bao giờ fail im lặng.
