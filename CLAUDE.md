@@ -26,6 +26,7 @@
 | "quét jira" (toàn bộ project) | Confirm → chạy `workflows/01-import-jira.md` (Bước 0: **chọn nguồn/domain** — Server nội bộ hay Atlassian Cloud — rồi mới quét) |
 | "quét task <KEY>" / "quét epic <KEY>" (vd `quét task PROJ-102`) | Confirm → chạy `workflows/01b-import-jira-single.md` |
 | "đặt lịch quét jira", "tự động đồng bộ jira" | Confirm → chạy `workflows/08-schedule-sync.md` |
+| "báo cáo tiến độ", "report tiến độ", "tiến độ dự án", "sinh báo cáo" | Confirm → chạy `workflows/14-progress-report.md` (sinh dashboard từ vault Jira: time/sprint active/assignee → **hiện UI inline trong Cowork** + file HTML). Cũng tự chạy sau khi lịch 8:00 quét xong (Pha 2). |
 | "tiến hóa KB", "dọn dẹp KB", "kiểm tra sức khỏe KB" | Confirm → chạy `workflows/09-evolve.md` |
 | Gửi file PDF/DOCX/**ảnh** (PNG/JPG)/zip Obsidian | Confirm → chạy `workflows/02-import-files.md` |
 | Nêu một vấn đề / yêu cầu / thay đổi nghiệp vụ | **TỰ ĐỘNG** phân tích (Tầng A — xem §0.1), không cần lệnh → confirm trước khi ghi |

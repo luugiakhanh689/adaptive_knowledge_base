@@ -1,9 +1,9 @@
 {
   "name": "Adaptive Knowledge Base",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "codename": "Genesis-1",
   "released": "2026-06-15",
   "repo": "https://github.com/luugiakhanh689/adaptive_knowledge_base",
   "force": true,
-  "intro": "Bản v1.0.9: quét Jira hiển thị đẹp các field tiến độ — Sprint (kèm trạng thái + ngày), thời gian Ước tính/Đã log/Còn lại, ngày bắt đầu/kết thúc/đến hạn (đổi giờ-ngày dễ đọc). Bổ sung cho bản cào-hết-field v1.0.8."
+  "intro": "Bản v1.1.0: thêm BÁO CÁO TIẾN ĐỘ dự án — gõ 'báo cáo tiến độ' để sinh dashboard từ dữ liệu Jira (thời gian est/log/remaining, sprint đang chạy, theo người phụ trách, rủi ro): hiện UI ngay trong Cowork + file HTML mở bằng trình duyệt. Local, không đẩy lên server."
 }
