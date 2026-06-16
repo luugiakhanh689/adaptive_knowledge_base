@@ -15,6 +15,10 @@
 
 ## Bước 0.5 — LÀM MỚI dữ liệu trước khi report (Pha 2)
 
+> 💡 Nếu `config > jira.effort_field` có giá trị (vd `customfield_10867`), **đặt biến
+> `JIRA_EFFORT_FIELD=<id>` trước mọi lệnh `import_jira.py`** (token lẫn `--from-mcp`) để gộp field
+> "ước tính theo giờ" vào est khi issue thiếu time-tracking chuẩn.
+
 Kiểm tra độ mới: `python3 tools/jira-to-obsidian/import_jira.py --check-fresh` (Windows `py`) → JSON
 `{last_import, is_stale, age_days, done_today}`. **`done_today:true` & `is_stale:false` → BỎ QUA làm mới**
 (dữ liệu đủ mới), sang Bước 1. Ngược lại, làm mới theo LOẠI Jira (đọc `JIRA_BASE_URL`/config):
