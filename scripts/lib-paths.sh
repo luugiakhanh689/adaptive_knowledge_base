@@ -77,6 +77,7 @@ DATA_PATHS=(
   "docs/06-decisions"
   "docs/08-glossary"
   "inbox"
+  "reports"
   "config/factory-config.yaml"
   "config/domain-rules.md"
 )
