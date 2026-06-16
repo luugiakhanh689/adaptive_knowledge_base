@@ -73,6 +73,9 @@ VAULT = _vault_raw if os.path.isabs(_vault_raw) else os.path.normpath(os.path.jo
 PROJECT_KEYS = [k.strip() for k in (os.getenv("PROJECT_KEYS") or "").split(",") if k.strip()]
 AC_FIELD = os.getenv("JIRA_AC_FIELD") or ""
 BR_FIELD = os.getenv("JIRA_BR_FIELD") or ""
+# Custom field "effort/estimate theo GIỜ" (vd FMC: customfield_10867 "Effort Plan (h)") — gộp vào
+# ước tính khi issue KHÔNG có time-tracking chuẩn. Giá trị field tính bằng giờ → x3600 ra giây.
+EFFORT_FIELD = os.getenv("JIRA_EFFORT_FIELD") or ""
 # Mặc định BẬT gom theo project; chỉ tắt khi user ghi rõ GROUP_BY_PROJECT=false
 PER_PROJECT = (os.getenv("GROUP_BY_PROJECT") or "true").strip().lower() not in ("0", "false", "no")
 # Mặc định CÀO HẾT mọi field (fields=*all + map tên custom field). Tắt: JIRA_FETCH_ALL_FIELDS=false
@@ -452,9 +455,16 @@ def _time_seconds(f):
             return tt.get(tt_key)
         v = f.get(top_key)
         return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
-    return (g("originalEstimateSeconds", "timeoriginalestimate"),
-            g("timeSpentSeconds", "timespent"),
-            g("remainingEstimateSeconds", "timeestimate"))
+    est = g("originalEstimateSeconds", "timeoriginalestimate")
+    spent = g("timeSpentSeconds", "timespent")
+    rem = g("remainingEstimateSeconds", "timeestimate")
+    if est is None and EFFORT_FIELD:  # gộp field effort tùy biến (giờ) khi thiếu ước tính chuẩn
+        ev = f.get(EFFORT_FIELD)
+        if isinstance(ev, (int, float)) and not isinstance(ev, bool) and ev > 0:
+            est = int(ev * 3600)
+            if rem is None and spent is not None:  # suy ra còn lại nếu có log
+                rem = max(est - spent, 0)
+    return (est, spent, rem)
 
 
 def _story_points(f):
