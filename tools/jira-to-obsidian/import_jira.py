@@ -75,6 +75,9 @@ AC_FIELD = os.getenv("JIRA_AC_FIELD") or ""
 BR_FIELD = os.getenv("JIRA_BR_FIELD") or ""
 # Mặc định BẬT gom theo project; chỉ tắt khi user ghi rõ GROUP_BY_PROJECT=false
 PER_PROJECT = (os.getenv("GROUP_BY_PROJECT") or "true").strip().lower() not in ("0", "false", "no")
+# Mặc định CÀO HẾT mọi field (fields=*all + map tên custom field). Tắt: JIRA_FETCH_ALL_FIELDS=false
+ALL_FIELDS = (os.getenv("JIRA_FETCH_ALL_FIELDS") or "true").strip().lower() not in ("0", "false", "no")
+FIELD_MAP = {}  # id field -> tên người-đọc (điền từ /rest/api/2/field khi chạy quét)
 
 def _is_cloud():
     if AUTH_MODE == "cloud":
@@ -205,12 +208,117 @@ def get_parent(issue):
 
 
 def issue_fields():
+    if ALL_FIELDS:
+        return "*all"  # CÀO HẾT: lấy TẤT CẢ field (gồm mọi custom field)
     fields = "summary,description,issuetype,status,parent,issuelinks,comment,attachment,project"
     if AC_FIELD:
         fields += f",{AC_FIELD}"
     if BR_FIELD:
         fields += f",{BR_FIELD}"
     return fields
+
+
+def fetch_field_map():
+    """Map id field → tên người-đọc (gồm cả custom field). TOLERANT: lỗi thì trả {} (không die)."""
+    try:
+        url = f"{BASE_URL}/rest/api/2/field"
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        return {fd["id"]: (fd.get("name") or fd["id"])
+                for fd in data if isinstance(fd, dict) and fd.get("id")}
+    except Exception:
+        return {}  # không lấy được tên → vẫn quét, hiển thị id thô
+
+
+def adf_to_text(node):
+    """Flatten Atlassian Document Format (Cloud API v3 trả rich-text dạng dict) → text đọc được."""
+    if node is None:
+        return ""
+    if isinstance(node, str):
+        return node
+    if isinstance(node, list):
+        return "".join(adf_to_text(n) for n in node)
+    if not isinstance(node, dict):
+        return str(node)
+    t = node.get("type")
+    content = node.get("content")
+    if t == "text":
+        txt = node.get("text", "")
+        for m in node.get("marks", []):
+            if m.get("type") == "link":
+                href = (m.get("attrs") or {}).get("href")
+                if href:
+                    txt = f"{txt} ({href})"
+        return txt
+    if t == "hardBreak":
+        return "\n"
+    if t == "mention":
+        return "@" + (node.get("attrs") or {}).get("text", "").lstrip("@")
+    if t == "emoji":
+        a = node.get("attrs") or {}
+        return a.get("text") or a.get("shortName") or ""
+    if t in ("inlineCard", "blockCard"):
+        return (node.get("attrs") or {}).get("url", "")
+    if t == "paragraph":
+        return adf_to_text(content) + "\n"
+    if t == "heading":
+        lvl = (node.get("attrs") or {}).get("level", 1)
+        return "#" * lvl + " " + adf_to_text(content).strip() + "\n"
+    if t in ("bulletList", "orderedList"):
+        return adf_to_text(content)
+    if t == "listItem":
+        return "- " + adf_to_text(content).strip() + "\n"
+    if t == "codeBlock":
+        return "```\n" + adf_to_text(content).strip() + "\n```\n"
+    if t == "blockquote":
+        return "> " + adf_to_text(content).strip() + "\n"
+    if t == "rule":
+        return "\n---\n"
+    if t in ("table", "tableRow"):
+        return adf_to_text(content)
+    if t in ("tableCell", "tableHeader"):
+        return adf_to_text(content).strip() + " | "
+    if content is not None:  # doc + node lạ → đệ quy content
+        return adf_to_text(content)
+    return ""
+
+
+def format_field_value(v):
+    """Chuẩn hoá MỌI kiểu giá trị field Jira → text gọn (cho phần 'Tất cả field')."""
+    if v is None:
+        return ""
+    if isinstance(v, bool):
+        return "có" if v else "không"
+    if isinstance(v, (int, float)):
+        return str(v)
+    if isinstance(v, str):
+        return v.strip()
+    if isinstance(v, dict):
+        if v.get("type") == "doc":
+            return adf_to_text(v).strip()
+        for k in ("displayName", "name", "value", "label", "emailAddress"):
+            if v.get(k):
+                return str(v[k])
+        if v.get("key") and "fields" in v:  # nested issue
+            return v["key"]
+        if "amount" in v:
+            return str(v.get("amount"))
+        return json.dumps(v, ensure_ascii=False)
+    if isinstance(v, list):
+        parts = [format_field_value(x) for x in v]
+        return "; ".join(p for p in parts if p)
+    return str(v)
+
+
+# Field đã render ở section riêng → KHÔNG lặp lại trong "Tất cả field"
+_RENDERED_KEYS = {"summary", "description", "issuetype", "status", "parent",
+                  "issuelinks", "attachment", "comment", "project"}
+# Field thường, đưa lên frontmatter cho dễ tra (chỉ khi có giá trị, 1 dòng)
+_FM_FIELDS = [("priority", "priority"), ("assignee", "assignee"), ("reporter", "reporter"),
+              ("labels", "labels"), ("components", "components"), ("fixVersions", "fix_versions"),
+              ("created", "created"), ("updated", "updated"), ("resolution", "resolution"),
+              ("duedate", "duedate")]
 
 
 def fetch_by_jql(jql):
@@ -295,18 +403,23 @@ def issue_note(issue, project_key, fname_map):
         "---",
         f"type: {itype}", "source: jira", f"jira_key: {key}",
         f"jira_issue_type: {f['issuetype']['name']}", f"project: {project_key}",
-        f"status: {status}", f"parent: {parent}", f"imported_at: {NOW}", "---", "",
-        f"# {key} — {summary}", "",
-        "## Metadata", "",
-        f"- Loại: {f['issuetype']['name']}", f"- Trạng thái: {status}",
-        f"- Link Jira: {BASE_URL}/browse/{key}", "",
+        f"status: {status}", f"parent: {parent}",
     ]
+    for fid, label in _FM_FIELDS:  # enrich frontmatter các field hay tra (chỉ khi có, 1 dòng)
+        val = format_field_value(f.get(fid))
+        if val and "\n" not in val:
+            fm.append(f"{label}: {json.dumps(val, ensure_ascii=False)}")
+    fm += [f"imported_at: {NOW}", "---", "",
+           f"# {key} — {summary}", "",
+           "## Metadata", "",
+           f"- Loại: {f['issuetype']['name']}", f"- Trạng thái: {status}",
+           f"- Link Jira: {BASE_URL}/browse/{key}", ""]
     if f.get("description"):
-        fm += ["## Description", "", md_escape(f["description"]), ""]
+        fm += ["## Description", "", format_field_value(f["description"]), ""]
     if AC_FIELD and f.get(AC_FIELD):
-        fm += ["## Acceptance Criteria Raw", "", md_escape(f[AC_FIELD]), ""]
+        fm += ["## Acceptance Criteria Raw", "", format_field_value(f[AC_FIELD]), ""]
     if BR_FIELD and f.get(BR_FIELD):
-        fm += ["## Business Rule Raw", "", md_escape(f[BR_FIELD]), ""]
+        fm += ["## Business Rule Raw", "", format_field_value(f[BR_FIELD]), ""]
     if parent:
         fm += ["## Parent", "", f"- [[{fname_map.get(parent, parent)}]]", ""]
     links = []
@@ -317,15 +430,38 @@ def issue_note(issue, project_key, fname_map):
             links.append(f"- {rel}: [[{fname_map.get(other['key'], other['key'])}]]")
     if links:
         fm += ["## Linked Issues", ""] + links + [""]
-    atts = [f"- {a['filename']} ({a.get('size', '?')} bytes)" for a in f.get("attachment", [])]
+    atts = [f"- {a['filename']} ({a.get('size', '?')} bytes) — {a.get('content', '')}".rstrip(" —")
+            for a in f.get("attachment", [])]
     if atts:
         fm += ["## Attachments Metadata", ""] + atts + [""]
     comments = (f.get("comment") or {}).get("comments", [])
     if comments:
         fm += ["## Comments", ""]
         for c in comments:
-            fm.append(f"- **{c.get('author', {}).get('displayName', '?')}** ({c.get('created', '')[:10]}): {md_escape(c.get('body', ''))}")
+            who = (c.get("author") or {}).get("displayName", "?")
+            fm.append(f"- **{who}** ({(c.get('created') or '')[:10]}): {format_field_value(c.get('body', ''))}")
         fm.append("")
+    # ── CÀO HẾT: dump MỌI field còn lại (priority, labels, components, sprint, custom field…) ──
+    skip = set(_RENDERED_KEYS)
+    if AC_FIELD:
+        skip.add(AC_FIELD)
+    if BR_FIELD:
+        skip.add(BR_FIELD)
+    extra = []
+    for fid in sorted(f.keys()):
+        if fid in skip:
+            continue
+        val = format_field_value(f.get(fid))
+        if not val:
+            continue
+        label = FIELD_MAP.get(fid, fid)
+        if "\n" in val:
+            extra.append(f"- **{label}** (`{fid}`):")
+            extra += ["  " + line for line in val.splitlines()]
+        else:
+            extra.append(f"- **{label}** (`{fid}`): {val}")
+    if extra:
+        fm += ["## Tất cả field (đầy đủ)", ""] + extra + [""]
     fm += ["## Source", "", f"- SRC-JIRA-{key}", ""]
     return "\n".join(fm)
 
@@ -419,6 +555,9 @@ def merge_system(nodes, edges, registry):
 def run_single(jql):
     """Chế độ quét lẻ: --keys / --jql. Chỉ tạo/cập nhật note liên quan, merge graph."""
     print(f"Đang quét theo điều kiện: {jql}")
+    global FIELD_MAP
+    if ALL_FIELDS and not FIELD_MAP:
+        FIELD_MAP = fetch_field_map()
     issues = fetch_by_jql(jql)
     if not issues:
         die("Không tìm thấy issue nào khớp. Kiểm tra key/JQL và quyền xem.")
@@ -443,6 +582,9 @@ def run_single(jql):
 
 def run_full():
     print("Đang lấy danh sách project...")
+    global FIELD_MAP
+    if ALL_FIELDS and not FIELD_MAP:
+        FIELD_MAP = fetch_field_map()
     projects = fetch_projects()
     print(f"Tìm thấy {len(projects)} project.")
 
