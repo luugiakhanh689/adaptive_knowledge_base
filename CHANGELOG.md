@@ -10,6 +10,16 @@
 
 ---
 
+## v1.0.8 "Genesis-1" — 2026-06-15
+
+- **Quét Jira CÀO HẾT mọi field:** `tools/jira-to-obsidian/import_jira.py` mặc định dùng
+  `fields=*all` — mỗi note lấy TẤT CẢ field của issue (priority, labels, components, assignee,
+  reporter, created/updated, resolution, sprint, story points và MỌI custom field) ở mục
+  `## Tất cả field (đầy đủ)`, tên custom field hiển thị người-đọc (map từ `/rest/api/2/field`).
+  Thêm flatten ADF (rich-text Cloud), enrich frontmatter, attachment kèm link. Tắt bằng
+  `JIRA_FETCH_ALL_FIELDS=false` cho chế độ gọn.
+- (Không có migration DATA → cập nhật giữ nguyên tri thức của bạn. Quét lại để lấy đầy đủ field mới.)
+
 ## v1.0.7 "Genesis-1" — 2026-06-14
 
 - **Obsidian là TÙY CHỌN:** setup (`workflows/00-setup.md` Bước 3) giờ HỎI "đã cài Obsidian chưa?"

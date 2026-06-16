@@ -206,6 +206,13 @@ Khi sandbox không chạy được (lỗi mạng), KHÔNG dừng luồng setup l
 Script tự tạo trong vault: notes Project/Epic/Story/Task/Bug/Sub-task có backlink,
 `_system/relation-graph.json`, `_system/source-registry.json`, `00_Index/Jira-Knowledge-Base.md`.
 
+> 📦 **CÀO HẾT field (mặc định):** mỗi note lấy **TẤT CẢ field** của issue — gồm priority,
+> labels, components, assignee/reporter, created/updated, resolution, sprint, story points và
+> **MỌI custom field** (tên hiển thị người-đọc, lấy từ `/rest/api/2/field`) — ở mục `## Tất cả
+> field (đầy đủ)`, cộng comment + metadata đính kèm (tên/size/link). Rich-text Cloud (ADF) được
+> flatten cho dễ đọc. Muốn nhẹ (chỉ field cốt lõi) → đặt `JIRA_FETCH_ALL_FIELDS=false` trong
+> `.env.local`. Lưu ý: cào hết ⇒ payload lớn hơn cho project nghìn issue → nên chạy nền.
+
 ## Bước 5 — Báo cáo + Approval Gate
 
 1. **Hiện NGAY bảng kết quả** (tiếng Việt): đếm theo loại — Epics / User Stories / Tasks /

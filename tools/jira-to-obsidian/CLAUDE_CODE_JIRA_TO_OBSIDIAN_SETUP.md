@@ -92,6 +92,8 @@ PROJECT_KEYS=
 # Nếu Jira có custom field Acceptance Criteria / Business Rule thì điền field id
 JIRA_AC_FIELD=
 JIRA_BR_FIELD=
+# Mặc định CÀO HẾT mọi field (fields=*all + map tên custom field). false = chỉ field cốt lõi.
+JIRA_FETCH_ALL_FIELDS=true
 ```
 
 Ý nghĩa biến môi trường:
