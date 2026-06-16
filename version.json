@@ -1,9 +1,9 @@
 {
   "name": "Adaptive Knowledge Base",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "codename": "Genesis-1",
   "released": "2026-06-15",
   "repo": "https://github.com/luugiakhanh689/adaptive_knowledge_base",
   "force": true,
-  "intro": "Bản v1.2.0: 'báo cáo tiến độ' nay TỰ LÀM MỚI dữ liệu trước khi báo — Jira Cloud tự kéo issue mới qua MCP (không cần token) nạp vào tri thức rồi report; Jira nội bộ thì kiểm tra độ mới, nếu cũ thì vẫn hiện báo cáo (đánh dấu CŨ) + lệnh terminal để bạn tự kéo. Thêm 'đặt lịch báo cáo' 8:00."
+  "intro": "Bản v1.2.1: báo cáo tiến độ có thể gộp custom field 'ước tính theo giờ' (vd 'Effort Plan (h)') vào tổng ước tính khi issue thiếu time-tracking chuẩn — đặt jira.effort_field trong config (hoặc JIRA_EFFORT_FIELD)."
 }
