@@ -41,7 +41,7 @@ import Word/PDF, tự phân tích xung đột, tự học, tự reindex.
 | Lệnh / bạn nhắn | Hệ thống làm | Workflow |
 |---|---|---|
 | `@khởi tạo dự án` | Setup toàn bộ hệ thống lần đầu | workflows/00-setup.md |
-| `quét jira` | Quét TOÀN BỘ project Jira → vault (tự chạy; Jira nội bộ/VPN thì đưa lệnh Terminal copy-paste điền sẵn đường dẫn) | workflows/01-import-jira.md |
+| `quét jira` | Quét TOÀN BỘ project Jira → vault, **cào HẾT mọi field** (priority, labels, sprint, mọi custom field…) + comment + metadata đính kèm (tự chạy; Jira nội bộ/VPN thì đưa lệnh Terminal copy-paste điền sẵn đường dẫn) | workflows/01-import-jira.md |
 | `quét task PROJ-102` | Quét RIÊNG 1 hoặc vài issue/epic (cách nhau dấu phẩy) | workflows/01b-import-jira-single.md |
 | Mô tả một vấn đề / tính năng | Phân tích → trình bày dễ hiểu → bạn duyệt → ghi KB | workflows/03-request.md |
 | `thiết kế <tính năng>` | Chọn project Design → sinh brief → dựng prototype liên kết | workflows/04-claude-design.md |

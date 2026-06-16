@@ -1,9 +1,9 @@
 {
   "name": "Adaptive Knowledge Base",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "codename": "Genesis-1",
-  "released": "2026-06-14",
+  "released": "2026-06-15",
   "repo": "https://github.com/luugiakhanh689/adaptive_knowledge_base",
   "force": true,
-  "intro": "Bản v1.0.7: cài đặt giờ HỎI bạn đã có Obsidian chưa và nói rõ Obsidian là TÙY CHỌN — không có vẫn dùng bình thường; đồng thời mọi lệnh/hướng dẫn đã chuẩn theo hệ điều hành (macOS / Linux / Windows)."
+  "intro": "Bản v1.0.8: lệnh 'quét jira' giờ CÀO HẾT mọi field của issue (priority, labels, components, assignee, sprint, story points và MỌI custom field — hiển thị tên người-đọc) cùng comment + metadata đính kèm, nạp đầy đủ hơn vào brain."
 }
