@@ -1,9 +1,9 @@
 {
   "name": "Adaptive Knowledge Base",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "codename": "Genesis-1",
   "released": "2026-06-15",
   "repo": "https://github.com/luugiakhanh689/adaptive_knowledge_base",
   "force": true,
-  "intro": "Bản v1.1.0: thêm BÁO CÁO TIẾN ĐỘ dự án — gõ 'báo cáo tiến độ' để sinh dashboard từ dữ liệu Jira (thời gian est/log/remaining, sprint đang chạy, theo người phụ trách, rủi ro): hiện UI ngay trong Cowork + file HTML mở bằng trình duyệt. Local, không đẩy lên server."
+  "intro": "Bản v1.2.0: 'báo cáo tiến độ' nay TỰ LÀM MỚI dữ liệu trước khi báo — Jira Cloud tự kéo issue mới qua MCP (không cần token) nạp vào tri thức rồi report; Jira nội bộ thì kiểm tra độ mới, nếu cũ thì vẫn hiện báo cáo (đánh dấu CŨ) + lệnh terminal để bạn tự kéo. Thêm 'đặt lịch báo cáo' 8:00."
 }

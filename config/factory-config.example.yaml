@@ -37,6 +37,7 @@ knowledge_base:
 
 jira:
   enabled: false          # true nếu user chọn quét Jira lúc setup
+  type: auto              # auto | cloud | server — cloud (*.atlassian.net, MCP/token) | server (self-host, token-only)
   tool_path: tools/jira-to-obsidian
   group_by_project: true  # mỗi project Jira 1 thư mục con trong vault (hỏi lúc setup)
   run_mode: auto          # auto = thử sandbox trước | sandbox | user_terminal (tự ghi sau lần chạy đầu)
@@ -54,7 +55,9 @@ code:
 
 reports:                  # Báo cáo tiến độ (workflow 14) — sinh local từ vault, KHÔNG server
   output_dir: reports     # thư mục xuất dashboard HTML + JSON (DATA, gitignore)
-  scheduled: none         # none | <cron + task_id> — Pha 2: 8:00 tự pull→report (workflow 08)
+  scheduled: none         # none | <cron + task_id> — 8:00 tự làm mới→report (workflow 08 mục B)
+  stale_after_days: 1     # tri thức "cũ" nếu mốc cập nhật cuối cách hôm nay >= N ngày → banner + nhắc làm mới
+  refresh_source: auto    # auto | mcp | token | none — cách làm mới trước khi report (Cloud=mcp, self-host=token)
   # status_map (tùy chọn): map trạng thái Jira → nhóm done/in_progress/todo. Để trống = đoán theo từ khóa.
   # status_map:
   #   done: ["Done", "Closed", "Đã xong"]
