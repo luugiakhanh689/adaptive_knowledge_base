@@ -406,6 +406,83 @@ def _field_display(fid, raw):
     return format_field_value(raw)
 
 
+# ── Field MÁY-ĐỌC cho report tiến độ (numeric/structured, để cộng dồn & nhóm) ──
+def _sprint_objs(f):
+    """Chuẩn hoá field sprint (Cloud dict / Server serialize) → list {name,state,start,end}."""
+    for fid in f:
+        if fid == "status":
+            continue
+        v = f.get(fid)
+        if not _looks_like_sprint(v):
+            continue
+        out = []
+        for it in (v if isinstance(v, list) else [v]):
+            if isinstance(it, dict):
+                out.append({"name": it.get("name", ""), "state": (it.get("state") or "").lower(),
+                            "start": it.get("startDate"), "end": it.get("endDate")})
+            elif isinstance(it, str) and "name=" in it:
+                mn = _SPRINT_RE.search(it)
+                kv = {k.lower(): val for k, val in _SPRINT_KV.findall(it)}
+                out.append({"name": mn.group("name") if mn else "", "state": kv.get("state", "").lower(),
+                            "start": kv.get("startdate"), "end": kv.get("enddate")})
+        return out
+    return []
+
+
+def _active_sprint(f):
+    objs = _sprint_objs(f)
+    if not objs:
+        return None
+    for s in objs:
+        if s["state"] == "active":
+            return s
+    return objs[-1]  # không có active → sprint gần nhất
+
+
+def _time_seconds(f):
+    """(est, spent, remaining) tính bằng GIÂY — từ timetracking hoặc field giây top-level."""
+    tt = f.get("timetracking") if isinstance(f.get("timetracking"), dict) else {}
+    def g(tt_key, top_key):
+        if tt.get(tt_key) is not None:
+            return tt.get(tt_key)
+        v = f.get(top_key)
+        return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+    return (g("originalEstimateSeconds", "timeoriginalestimate"),
+            g("timeSpentSeconds", "timespent"),
+            g("remainingEstimateSeconds", "timeestimate"))
+
+
+def _story_points(f):
+    for fid, val in f.items():
+        if isinstance(val, (int, float)) and not isinstance(val, bool):
+            if "story point" in (FIELD_MAP.get(fid, "") or "").lower():
+                return val
+    return None
+
+
+def _machine_progress_fields(f):
+    """Dòng frontmatter MÁY-ĐỌC cho report: time(giây), story_points, sprint active."""
+    lines = []
+    est, spent, rem = _time_seconds(f)
+    if est is not None:
+        lines.append(f"time_estimate_s: {int(est)}")
+    if spent is not None:
+        lines.append(f"time_spent_s: {int(spent)}")
+    if rem is not None:
+        lines.append(f"time_remaining_s: {int(rem)}")
+    sp = _story_points(f)
+    if sp is not None:
+        lines.append(f"story_points: {sp}")
+    sprint = _active_sprint(f)
+    if sprint and sprint.get("name"):
+        lines.append(f"sprint_name: {json.dumps(sprint['name'], ensure_ascii=False)}")
+        if sprint.get("state"):
+            lines.append(f"sprint_state: {sprint['state']}")
+        if sprint.get("end"):
+            lines.append(f"sprint_end: {json.dumps((sprint['end'] or '')[:10], ensure_ascii=False)}")
+    return lines
+
+
 def fetch_by_jql(jql):
     """Server/DC: /rest/api/2/search (phân trang startAt/total).
     Cloud: /rest/api/3/search/jql (phân trang nextPageToken) — Atlassian đã GỠ
@@ -500,6 +577,7 @@ def issue_note(issue, project_key, fname_map):
             if sv:
                 fm.append(f"sprint: {json.dumps(sv, ensure_ascii=False)}")
             break
+    fm += _machine_progress_fields(f)  # time_*_s, story_points, sprint_name/state/end (cho report)
     fm += [f"imported_at: {NOW}", "---", "",
            f"# {key} — {summary}", "",
            "## Metadata", "",
